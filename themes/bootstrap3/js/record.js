@@ -104,6 +104,9 @@ function registerAjaxCommentRecord() {
       id:id,
       source:recordSource
     };
+    if (!!form['g-recaptcha-response']) {
+      data['g-recaptcha-response'] = form['g-recaptcha-response'].value;
+    }
     $.ajax({
       type: 'POST',
       url:  url,
@@ -114,6 +117,7 @@ function registerAjaxCommentRecord() {
           refreshCommentList(id, recordSource);
           $(form).find('textarea[name="comment"]').val('');
           $(form).find('input[type="submit"]').button('loading');
+          grecaptcha.reset();
         } else {
           Lightbox.displayError(response.data);
         }
