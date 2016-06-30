@@ -210,6 +210,11 @@
    <!-- Tracking fields to keep track of oldest and most recent index times -->
    <field name="first_indexed" type="date" indexed="true" stored="true"/>
    <field name="last_indexed" type="date" indexed="true" stored="true"/>
+
+   <!-- Ebooks from Municipal Library Prague -->
+   <field name="eFormats" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="mlpFilename" type="string" indexed="true" stored="true" multiValued="false"/>
+
    <!-- Dynamic fields for customization without schema modification -->
    <dynamicField name="*_date" type="date" indexed="true" stored="true"/>
    <dynamicField name="*_date_mv" type="date" indexed="true" stored="true" multiValued="true"/>

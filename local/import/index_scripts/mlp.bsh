@@ -1,0 +1,92 @@
+/**
+ * Support script for indexing e-books from Municipal Library Prague
+ *
+ * These set of functions is for adding data from e-books database of MLP
+ */
+
+import org.marc4j.marc.Record;
+import org.marc4j.marc.ControlField;
+import org.marc4j.marc.Subfield;
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
+import javax.xml.parsers.*;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.HashMap;
+
+/**
+ * Get MLP ebook field from xml
+ *
+ * @param  String  id - id of record
+ * @param  String  field to extract from ereading xml file
+ * @return Set     xml field
+ */
+
+private Set getMLPebooksField(String id, String xmlField) {
+    Set result = new LinkedHashSet();
+    if(!id.isEmpty()) {
+        String xmlfilename = "/usr/local/vufind/data/MLPebooks/" + id + ".xml";
+
+        try {
+            File xmlfile = new File(xmlfilename);
+            if(xmlfile.exists() && !xmlfile.isDirectory()) {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(xmlfile);
+                doc.getDocumentElement().normalize();
+                NodeList el = doc.getElementsByTagName(xmlField);
+                if (el.getLength() != 0) {
+                    result.add(el.item(0).getTextContent());
+                    return result;
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    return result;
+}
+
+/**
+ * Get id
+ *
+ * @param  Record     record
+ * @return String     id of record
+ */
+
+private String getId(Record record) {
+    String result = new String();
+    ControlField idrecord = (ControlField) record.getVariableField("001");
+    if(idrecord != null) {
+        result = idrecord.getData();
+    }
+    return result;
+}
+
+/**
+ * Get eFormats
+ *
+ * @param  Record  record
+ * @return String  eFormats
+ */
+
+public Set getEFormats(Record record) {
+    return getMLPebooksField(getId(record), "FORMATY");
+}
+
+/**
+ * Get filename
+ *
+ * @param  Record  record
+ * @return String  filename
+ */
+
+public Set getFilename(Record record) {
+    return getMLPebooksField(getId(record), "FILENAME");
+}
+
