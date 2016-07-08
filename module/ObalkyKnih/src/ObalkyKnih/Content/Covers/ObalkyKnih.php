@@ -45,9 +45,9 @@ class ObalkyKnih extends \VuFind\Content\AbstractCover
      */
     public function __construct()
     {
-        /* First implementation supports just ISBN, but obalkyknih.cz supports 
-           also ISSN, EAN, OCLC, could be implemented in the future */
-        $this->supportsIsbn = $this->cacheAllowed = true;
+        /* First implementation supports ISBN and ISSN, but obalkyknih.cz supports
+           also EAN and OCLC, could be implemented in the future */
+        $this->supportsIsbn = $this->supportsIssn = $this->cacheAllowed = true;
     }
 
     /**
@@ -79,19 +79,27 @@ class ObalkyKnih extends \VuFind\Content\AbstractCover
      */
     public function getUrl($key, $size, $ids)
     {
-        // Don't bother trying if we can't read JSON or ISBN is missing:
-        if (!is_callable('json_decode') || !isset($ids['isbn'])) {
+        // Don't bother trying if we can't read JSON or ISBN or ISSN is missing:
+        if (!is_callable('json_decode') || (!isset($ids['isbn']) && !isset($ids['issn']))) {
             return false;
         }
-
-        $isbn = $ids['isbn']->get13();
+        $biblioinfo = [];
+        if (isset($ids['isbn'])) {
+            $biblioinfo['isbn'] = $ids['isbn']->get13();
+        } elseif (isset($ids['issn'])) {
+            // yes, the parametr for ISSN in obalkyknih API is still "isbn"
+            $biblioinfo['isbn'] = $ids['issn'];
+        }
         $url = "http://cache.obalkyknih.cz/api/books?multi=";
-        $params = [["isbn" => $isbn]];
-        $url .= json_encode($params);
+        $url .= json_encode([$biblioinfo]);
 
         $result = $this->getHttpClient($url)->send();
         if ($result->isSuccess()) {
             $data = json_decode($result->getBody(), true);
+        }
+
+        if (!isset($data[0]) || $data[0]["flag_bare_record"] == 1) {
+            return false;
         }
 
         $coverUrl = false;
