@@ -1,0 +1,29 @@
+<?php
+$ePreviews = $this->driver->getEreadingPreviews();
+if(!empty($ePreviews)): ?>
+    <span class="ebookPreviewLabel"><?=$this->transEsc("E-book preview") ?>:</span><br/>
+
+    <? if(isset($ePreviews["pdf"])): ?>
+        <a class="btn btn-link btn-sm" href='<?=$ePreviews["pdf"]?>' target="_blank"><img src="<?=$this->imageLink("icon-download-pdf.png")?>" /><br/>PDF</a>
+    <? endif; ?>
+
+    <? if(isset($ePreviews["epub"])): ?>
+        <a class="btn btn-link btn-sm" href='<?=$ePreviews["epub"]?>' target="_blank"><img src="<?=$this->imageLink("icon-download-epub.png")?>" /><br/>Epub</a>
+    <? endif; ?>
+
+    <? if(isset($ePreviews["mobi"])): ?>
+        <a class="btn btn-link btn-sm" href='<?=$ePreviews["mobi"]?>' target="_blank"><img src="<?=$this->imageLink("icon-download-mobi.png")?>" /><br/>Mobi</a>
+    <? endif; ?>
+<?php endif; ?>
+
+<? if($this->driver->isEreadingBook()): ?>
+    <? $ereadingLendingUrl = $this->driver->getEreadingLendingUrl(); ?>
+    <? if($ereadingLendingUrl): ?>
+       <div><a class="btn btn-primary lendebook modal-link" href='<?=$this->url("record-lendebook", array("id" => $this->driver->getUniqueID())) ?>'><i class='fa fa-external-link'></i> Vypůjčit e-knihu</a></div>
+    <? else: ?>
+        <div id="ebook-alert" class="alert alert-warning">Pro půjčování e-knih musíte být <a class="modal-link alert-link" href="/vufind/MyResearch/UserLogin">přihlášeni</a>.</div>
+    <? endif; ?>
+
+    <a href="#"><i class="fa fa-info-circle"></i> Informace o půjčování e-knih</a>
+<? endif; ?>
+

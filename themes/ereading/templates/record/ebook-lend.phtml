@@ -1,0 +1,22 @@
+<?
+  // Set page title.
+  $this->headTitle($this->translate('E-book lending') . ': ' . $this->driver->getBreadcrumb());
+  // Set up breadcrumbs:
+  // Set up breadcrumbs:
+  $this->layout()->breadcrumbs = '<li>' . $this->getLastSearchLink($this->transEsc('Search'), '', '</li>')
+      . '<li>' . $this->recordLink()->getBreadcrumb($this->driver) . '</li>'
+      . '<li class="active">' . $this->transEsc('E-book lending') . '</li>';
+?>
+
+<h2><?=$this->transEsc("E-book lending")?></h2>
+<?if($this->eLendResponse): ?>
+        <p class="alert alert-success">Vaše výpůjčka byla zaznamenána a přiřazena k účtu s e-mailovou adresou <strong><?=$this->eLendEmail ?></strong>. Po synchronizaci bude dostupná přímo ve Vaší čtečce nebo aplikaci.</p>
+<? else: ?>
+        <p class="alert alert-danger">Výpůjčka se nezdařila, důvod je:
+                <ul>
+                        <li><strong><?=$this->transEsc($this->eLendReason)?></strong></li>
+                </ul>
+        Můžete mít půjčeno pouze <?=$this->maxIssues?> e-knih najednou, každou z nich na dobu <?=$this->lendingInterval?> dní. Zkontrolujte případně, jestli máte v knihovně i v účtu u eReadingu stejnou e-mailovou adresu. Může se také jednat o krátkodobý výpadek služby, v tom případě zkuste výpůjčku zopakovat později. Vaše e-mailová adresa je podle našich záznamů <?=$this->eLendEmail?>.
+        </p>
+<? endif; ?>
+<p class="alert alert-info">Podrobnosti o půjčování e-knih naleznete na <strong><a href="#">našich stránkách</a></strong>.</p>

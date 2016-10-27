@@ -1,0 +1,150 @@
+/**
+ * eReading.sh support script
+ *
+ * These set of functions is for adding information needed for e-book lending service 
+ * through ereading.cz platform
+ *
+ * Copyright 2015-2016 Josef Moravec
+ */
+
+import org.marc4j.marc.Record;
+import org.marc4j.marc.DataField;
+import org.marc4j.marc.Subfield;
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
+import javax.xml.parsers.*;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.HashMap;
+
+
+/**
+ * Get eReading book field from xml
+ *
+ * @param  Set     ean - set of isbn codes
+ * @param  String  field to extract from ereading xml file 
+ * @return Set     xml field
+ */
+
+private Set getEreadingField(Set ean, String xmlField) {
+    Set result = new LinkedHashSet();
+    if(!ean.isEmpty()) {
+	Iterator eanIterator = ean.iterator();
+	while(eanIterator.hasNext()) {
+		String eanCode = eanIterator.next();
+	        String xmlfilename = "data/ereading/" + eanCode + ".xml";
+        	try {
+	            File xmlfile = new File(xmlfilename);
+        	    if(xmlfile.exists() && !xmlfile.isDirectory()) { 
+                	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	                DocumentBuilder builder = factory.newDocumentBuilder();
+        	        Document doc = builder.parse(xmlfile);
+	               	doc.getDocumentElement().normalize();            
+        	        NodeList el = doc.getElementsByTagName(xmlField);
+                	if (el.getLength() != 0) {
+	                    result.add(el.item(0).getTextContent());
+        	            return result;
+                	}
+	            }
+        	} catch(Exception e) {
+	            e.printStackTrace();
+	        }
+	}
+    
+    }
+    return result;
+}
+
+/**
+ * Get and normalize EAN code (from ISBN)
+ *
+ * @param  Record     record
+ * @return Set      EAN code
+ */
+
+private Set getEAN(Record record) {
+    Set result = new LinkedHashSet();
+    DataField isbn = (DataField) record.getVariableField("020");
+    if(isbn != null) {
+        Subfield isbn2 = isbn.getSubfield('a');
+        if(isbn2 != null) {
+            String ean = isbn2.getData();
+            ean = ean.replaceAll("[^0-9]*","");
+            if(!ean.isEmpty()) {
+                result.add(ean);
+            }
+        }
+	Subfield isbn3 = isbn.getSubfield('z');
+        if(isbn3 != null) {
+            String ean2 = isbn3.getData();
+            ean2 = ean2.replaceAll("[^0-9]*","");
+            if(!ean2.isEmpty()) {
+                result.add(ean2);
+            }
+	}
+    }
+    return result;
+}
+
+/**
+ * Get eReading book ID
+ *
+ * @param  Record          record
+ * @return Set     id 
+ */
+
+public Set getEreadingId(Record record) {
+    return getEreadingField(getEAN(record), "ID");
+}
+
+/**
+ * Get eReading book URL
+ *
+ * @param  Record          record
+ * @return Set     url 
+ */
+
+public Set getEreadingUrl(Record record){
+    return getEreadingField(getEAN(record), "URL");
+}
+
+/**
+ * Get eReading book url of pdf preview
+ *
+ * @param  Record          record
+ * @return Set     url
+ */
+
+public Set getEreadingPreviewPdf(Record record){
+    return getEreadingField(getEAN(record), "PREVIEW_PDF");
+}
+
+/**
+ * Get eReading book url of epub preview
+ *
+ * @param  Record          record
+ * @return Set     url
+ */
+
+public Set getEreadingPreviewEpub(Record record){
+    return getEreadingField(getEAN(record), "PREVIEW_EPUB");
+}
+
+/**
+ * Get eReading book url of mobi preview
+ *
+ * @param  Record          record
+ * @return Set     url
+ */
+
+public Set getEreadingPreviewMobi(Record record){
+    return getEreadingField(getEAN(record), "PREVIEW_MOBI");
+}
+
+
+
