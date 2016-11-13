@@ -1,0 +1,130 @@
+<?
+    // Set up page title:
+    $this->headTitle($this->translate('Dashboard'));
+
+    // Set up breadcrumbs:
+    $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Dashboard') . '</li>';
+
+    // Template for use by the renderArray helper:
+    $arrTemplate = '<tr><th>%%LABEL%%:</th><td> %%VALUE%%</td></tr>';
+?>
+
+<div class="row">
+  <div class="<?=$this->layoutClass('mainbody')?>">
+    <h2><?=$this->transEsc('Dashboard')?></h2>
+    <?=$this->flashmessages();?>
+
+    <div class="row">
+      <div class="alert alert-warning">
+	<button type="button" class="close" data-dismiss="alert">&times;</button>
+        <?=$this->translate("Missing email info message")?> <strong><a href="<?=$this->url('myresearch-profile')?>"><?=$this->translate("Fill")?></strong></a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="alert alert-warning">
+	<button type="button" class="close" data-dismiss="alert">&times;</button>
+        <?=$this->translate("Missing phone info message")?> <strong><a href="<?=$this->url('myresearch-profile')?>"><?=$this->translate("Fill")?></strong></a>
+      </div>
+    </div>
+
+    <div class='row'>
+
+      <div class="col-sm-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Issues")?></h3>
+	  </div>
+	  <div class="panel-body">
+	    <h1 class="text-center">15</h1> 
+	    <p class="text-center"><span class="label label-danger">3</span> <?=$this->translate("should be returned until tomorrow")?></p>
+	    <p class="text-center"><span class="label label-warning">3</span> <?=$this->translate("cannot be prolonged")?></p>
+	    <p class="text-center"><span class="label label-warning">1</span> <?=$this->translate("days left to the closest return")?></p>
+	    <p><a class="btn btn-warning btn-block" href="#"><?=$this->translate("Prolong")?></a></p>
+	    <p><a class="btn btn-info btn-block" href="#"><?=$this->translate("Show all")?></a></p>
+	  </div>
+	</div>
+      </div>
+
+      <div class="col-sm-4">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Holds")?></h3>
+	  </div>
+	  <div class="panel-body">
+	    <h1 class="text-center">3</h1> 
+	    <p class="text-center"><span class="label label-default">1</span> <?=$this->translate("waiting for pick up")?></p>
+	    
+	    <p><a class="btn btn-info btn-block" href="#"><?=$this->translate("Show all")?></a></p>
+	  </div>
+	</div>
+      </div> 
+
+       <div class="col-sm-4">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Payments")?></h3>
+	  </div>
+	  <div class="panel-body">
+	    <h1 class="text-center">120</h1>
+	    <p><a class="btn btn-warning btn-block" href="#"><?=$this->translate("Pay all nonpaid")?></a></p>
+	    <p><a class="btn btn-info btn-block" href="<?=$this->url('myresearch-fines')?>"><?=$this->translate("Show all nonpaid")?></a></p>
+	  </div>
+	</div>
+      </div>
+
+    </div>
+    <div class="row">
+
+     <div class="col-sm-4">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Issues history")?></h3>
+	  </div>
+	  <div class="panel-body">
+	    <h1 class="text-center">2 758</h1>
+	    <p class="text-center"><strong>10</strong> <?=$this->translate("issues this month")?></p>
+	    <p class="text-center"><strong>6</strong> <?=$this->translate("issues this year")?></p>
+	    <p><a class="btn btn-info btn-block" href="#"><?=$this->translate("Show all")?></a></p>
+	  </div>
+	</div>
+      </div>
+
+
+      <div class="col-sm-4">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Favorite authors")?></h3>
+	  </div>
+	  <div class="panel-body">
+	    <ul class="list-group">
+	      <li class="list-group-item">Name Surname</li>
+	      <li class="list-group-item">Name Surname</li>
+	      <li class="list-group-item">Name Surname</li>
+	    </ul>
+	  </div>
+	</div>
+      </div>
+
+    <div class="col-sm-4">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Favorite topics")?></h3>
+	  </div>
+	  <div class="panel-body" style="padding: 0px;">
+	    <ul class="list-group">
+	      <li class="list-group-item">Name Surname</li>
+	      <li class="list-group-item">Name Surname</li>
+	    </ul>
+	  </div>
+	</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="<?=$this->layoutClass('sidebar')?>">
+    <?=$this->context($this)->renderInContext("myresearch/menu.phtml", array('active' => 'dashboard'))?>
+  </div>
+</div>

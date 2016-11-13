@@ -1,5 +1,10 @@
 <h4><?=$this->transEsc('Your Account')?></h4>
 <div class="list-group">
+  <? $user = $this->auth()->isLoggedIn(); if ($user): ?>
+    <a href="<?=$this->url('myresearch-dashboard')?>" class="list-group-item<?=$this->active == 'dashboard' ? ' active' : ''?>">
+      <i class="fa fa-fw fa-barcode" aria-hidden="true"></i> <?=$this->transEsc('Dashboard')?>
+    </a>
+  <? endif; ?>
   <? if ($this->userlist()->getMode() !== 'disabled'): ?>
     <a href="<?=$this->url('myresearch-favorites')?>" class="list-group-item<?=$this->active == 'favorites' ? ' active' : ''?>">
       <i class="fa fa-fw fa-star" aria-hidden="true"></i> <?=$this->transEsc('Favorites')?>
