@@ -1499,6 +1499,12 @@ class MyResearchController extends AbstractBase
             // locations, they are not supported and we should ignore them.
         }
 
+	/*
+	$kohaApi = '';
+	$summary = $kohaApi->getSummary($patron);
+	$view->sumary = $summary;
+	*/
+
         return $view;
     }
 }
