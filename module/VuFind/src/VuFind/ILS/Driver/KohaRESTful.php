@@ -29,7 +29,6 @@
  */
 namespace VuFind\ILS\Driver;
 
-use PDO, PDOException;
 use VuFind\Exception\ILS as ILSException,
     VuFindHttp\HttpServiceAwareInterface as HttpServiceAwareInterface,
     Zend\Log\LoggerAwareInterface as LoggerAwareInterface,
@@ -204,25 +203,25 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
             $client->addCookie('CGISESSID', $this->CGISESSID);
         }
         if($data !== null) {
-            $client->setRawBody(http_build_query($data));
+            if ($httpMethod == 'GET') {
+                $client->setParameterGet($data);
+            } else {
+                $client->setRawBody(http_build_query($data));
+            }
         }
-
         try {
             $response = $client->send();
         } catch (\Exception $e) {
             throw new ILSException($e->getMessage());
         }
-
         if (!$response->isSuccess()) {
-            var_dump($response->getBody());
-            echo $this->apiUrl . $apiQuery;
             throw new ILSException("Error in communication with Koha API:" . $response->getBody() . 
                                    " HTTP status code: " . $response->getStatusCode() );
         }
 
         $result = json_decode($response->getBody());
         if (json_last_error() !== JSON_ERROR_NONE ) {
-            throw new ILSException("Error parsing hajson response of Koha API");
+            throw new ILSException("Error parsing json response of Koha API");
         }
         return $result;
     }
@@ -259,7 +258,7 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
     /**
      * https://vufind.org/wiki/development:plugins:ils_drivers#getpickuplocations
      */
-    public function getPickupLocations($patron = false, $holdDetails = null)
+    public function getPickUpLocations($patron = false, $holdDetails = null)
     {
         // TODO: check if pickupEnableBranchcodes is set (maybe better in init method), if not, use default, if it's not set, get all locations from API
         if ( !isset($this->locations )) {
@@ -274,9 +273,10 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
                     ];
                 }
             }
-            $this->locatins = $locations;
+            $this->locations = $locations;
         }
         return $this->locations;
+     
     }
 
     /**
@@ -298,6 +298,66 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
     public function getDefaultPickUpLocation($patron = false, $holdDetails = null)
     {
         return $this->defaultLocation;
+    }
+
+    /**
+     * Place Hold
+     *
+     * Attempts to place a hold or recall on a particular item and returns
+     * an array with result details or throws an exception on failure of support
+     * classes
+     *
+     * @param array $holdDetails An array of item and patron data
+     *
+     * @throws ILSException
+     * @return mixed An array of data on the request including
+     * whether or not it was successful and a system message (if available)
+     */
+    public function placeHold($holdDetails)
+    {
+        $patron          = $holdDetails['patron'];
+        $pickup_location = !empty($holdDetails['pickUpLocation'])
+            ? $holdDetails['pickUpLocation'] : $this->defaultLocation;
+        $level           = isset($holdDetails['level'])
+            && !empty($holdDetails['level']) ? $holdDetails['level'] : "item";
+
+        try {
+            $dateObject = \DateTime::createFromFormat(
+                "m-d-Y", $holdDetails['requiredBy']
+            );
+            if (is_object($dateObject)) {
+                $needed_before_date = $dateObject->format("Y-m-d");
+            }
+        } catch (\Exception $e) {
+            return [
+                "success" => false,
+                "sysMessage" => "It seems you entered an invalid expiration date."
+            ];
+        }
+
+        $data = [
+            'borrowernumber' => $patron['id'],
+            'expirationdate' => $needed_before_date,
+            'branchcode'     => $pickup_location,
+        ];
+        if ($level == 'item') { 
+            $data['itemnumber'] = $holdDetails['item_id'];
+        } else {
+            $data['biblionumber'] = $holdDetails['id'];
+        }
+        if (isset($holdDetails['comment']) && !empty($holdDetails['comment'])) {
+            $data['reservenotes'] = $holdDetails['comment'];
+        }
+        try {
+            $result = $this->makeRESTfulRequest('/holds', 'POST', $data);
+        } catch (Exception $e) {
+            return [
+                "succes" => false,
+                "sysMessage" => $e->getMessage(),
+            ];
+        }
+
+        return ['success' => true];
     }
 
     /**
@@ -360,6 +420,39 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
     }
 
     /**
+     * Change Password
+     *
+     * This method changes patron's password (PIN code)
+     *
+     * @param array $details An array of patron id and old and new password:
+     *
+     * patron      The patron array from patronLogin
+     * oldPassword Old password
+     * newPassword New password
+     *
+     * @return array An array of data on the request including
+     * whether or not it was successful and a system message (if available)
+     */
+    public function changePassword($details)
+    {
+        $patron = $details['patron'];
+        $data = [
+            'current_password' => $details['oldPassword'],
+            'new_password' => $details['newPassword'],
+        ];
+        try {
+            $change = $this->makeRESTfulRequest(
+                '/patrons/' . $patron['id'] . '/password',
+                'PATCH',
+                $data
+            );
+        } catch (Exception $e) {
+            return [ 'success' => false, 'status' => $e->getMessage() ];
+        }
+        return ['success' => true, 'status' => 'change_password_ok'];
+    }    
+
+    /**
      * Get Patron Transactions
      *
      * This is responsible for retrieving all transactions (i.e. checked out items)
@@ -377,9 +470,15 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
         $checkoutsList = [];
         if($checkouts) {
             foreach ($checkouts as $checkout) {
-                //TODO: it's not nice to make request for each checkout in the loop
                 $item = $this->makeRESTfulRequest('/items/' . $checkout->itemnumber);
-                //$renewable = $this->makeRESTfulRequest('/checkouts/' . $checkout->issue_id . '/renewability');
+                try {
+                    $renewability = $this->makeRESTfulRequest(
+                        '/checkouts/' . $checkout->issue_id . '/renewability'
+                    ); 
+                    $renewable = true;
+                } catch (ILSException $e) {
+                    $renewable = false;
+                }
                 $checkoutsList[] = [
                     'duedate'           => $this->formatDate($checkout->date_due),
                     'id'                => $item ? $item->biblionumber : 0,
@@ -387,7 +486,7 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
                     'barcode'           => $item ? $item->barcode : 0,
                     'renew'             => $checkout->renewals,
                     'borrowingLocation' => $checkout->branchcode, //TODO: add branch name
-            //        'renewable' => is_object($renewable) ? 1 : 0, //TODO: renewability is based on http status - it's weird
+                    'renewable'         => $renewable,
 //                    'request => , //TODO: is item reserved?
                 ];
        
@@ -406,12 +505,15 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
         if($holds) {
             foreach ($holds as $hold) {
                 $holdsList[] = [
-                    'id'        => $hold->biblionumber,
-                    'location'  => $hold->branchcode, //TODO: add branch name
-                    'expire'    => $this->formatDate($hold->expirationdate),
-                    'create'    => $this->formatDate($hold->reservedate),
-                    'position'  => $hold->priority,
-                    'available' => $hold->found,
+                    'id'         => $hold->biblionumber,
+                    'location'   => $hold->branchcode, //TODO: add branch name
+                    'expire'     => $this->formatDate($hold->expirationdate),
+                    'create'     => $this->formatDate($hold->reservedate),
+                    'position'   => $hold->priority,
+                    'available'  => $hold->found,
+                    'item_id'    => $hold->itemnumber,
+                    'reserve_id' => $hold->reserve_id,
+
                 ];
             }
         }
@@ -424,24 +526,7 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
 //    public function getMyFines($patron)
 //    {
 //        $fines = $this->makeRESTfulRequest('/');
- 
-    /**
-     * Place Hold
-     *
-     * Attempts to place a hold or recall on a particular item and returns
-     * an array with result details or throws an exception on failure of support
-     * classes
-     *
-     * @param array $holdDetails An array of item and patron data
-     *
-     * @throws ILSException
-     * @return mixed An array of data on the request including
-     * whether or not it was successful and a system message (if available)
-     */
-/*    public function placeHold($holdDetails)
-    {
-
-    }*/
+//    }
 
 
     /**
@@ -456,30 +541,125 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
         $biblio = $this->makeRESTfulRequest('/biblios/' . $id);
         $holdingsList = [];
         if ($biblio) {
+            $holds = $this->makeRESTfulRequest('/holds', 'GET', [ 'biblionumber' => $biblio->biblionumber ]);
             foreach ($biblio->items as $i) {
                 $item = $this->makeRESTfulRequest('/items/' . $i->itemnumber);
                 $holdingsList[] = [
-                    'id'          => $id,
-                    'availabiity' => $item->onloan ? false : true,
-                    'status'      => $item->onloan ? 'Checked out' : 'Available', //TODO: more statuses
-                    'location'    => $item->holdingbranch,
-                    'callnumber'  => $item->callnumber,
-                    'number'      => $item->stocknumber,
-                    'barcode'     => $item->barcode,
-                    'supplements' => $item->materials,
-                    'item_notes'  => $item->itemnotes,
-                    'item_id'     => $i->itemnumber,
-//                    ''         =>,
- //                   ''         =>,
-  //                  ''         =>,
-//                    'rewuests_placed'         =>,
+                    'id'              => $id,
+                    'availability'    => $item->onloan ? false : true,
+                    'status'          => $item->onloan ? 'Checked out' : 'Available', //TODO: more statuses
+                    'location'        => $item->holdingbranch,
+                    'callnumber'      => $item->callnumber,
+                    'number'          => $item->stocknumber,
+                    'barcode'         => $item->barcode,
+                    'supplements'     => $item->materials,
+                    'item_notes'      => $item->itemnotes,
+                    'item_id'         => $i->itemnumber,
+                    'requests_placed' => count($holds),
                     'duedate'         => null, //TODO
-                    'reurnDate'         => false, //TODO
-//                    'reserve'         =>, //Y or N
-//                    ''         =>,
+                    'returnDate'      => false, //TODO
+                    'reserve'         => (count($holds) > 1) ? 'Y' : 'N',
                 ];
             }
         }
         return $holdingsList;
     }
+
+    /**
+     * Get Cancel Hold Details
+     *
+     * Get required data for canceling a hold. This value is used by relayed to the
+     * cancelHolds function when the user attempts to cancel a hold.
+     *
+     * @param array $holdDetails An array of hold data
+     *
+     * @return string Data for use in a form field
+     */
+    public function getCancelHoldDetails($holdDetails)
+    {
+        return $holdDetails['available'] ? '' : $holdDetails['reserve_id'];
+    }
+
+    /**
+     * Cancel Holds
+     *
+     * This method cancels a list of holds for a specific patron
+     *
+     * @param array $cancelDetails An array of item and patron data
+     *
+     * @return array               An array of data on each request including
+     * whether or not it was successful and a system message (if available)
+     */
+    public function cancelHolds($cancelDetails)
+    {
+        $details = $cancelDetails['details'];
+        $patron = $cancelDetails['patron'];
+        $count = 0;
+        $response = [];
+        foreach ($details as $holdId) {
+            try {
+                $cancelledHold = $this->makeRESTfulRequest('/holds/' . $holdId, 'DELETE');
+                $count++;
+                $response[$holdId] = [
+                    'success' => true, 
+                    'status' => 'hold_cancel_success'
+                ];
+            } catch (ILSException $e) {
+                $response[$holdId] = [
+                    'success' => false, 
+                    'status' => 'hold_cancel_fail',
+                    'sysMessage' => $e->getMessage()
+                ];
+            }
+        }
+        return ['count' => $count, 'items' => $response];
+    }
+
+    /**
+     * Get Renew Details
+     *
+     * @param array $checkOutDetails An array of item data
+     *
+     * @return string Data for use in a form field
+     */
+    public function getRenewDetails($checkOutDetails)
+    {
+        return $checkOutDetails['checkout_id'] . '|' . $checkOutDetails['item_id'];
+    }
+
+    /**
+     * Renew My Items
+     *
+     * Function for attempting to renew a patron's items.  The data in
+     * $renewDetails['details'] is determined by getRenewDetails().
+     *
+     * @param array $renewDetails An array of data required for renewing items
+     * including the Patron ID and an array of renewal IDS
+     *
+     * @return array              An array of renewal information keyed by item ID
+     */
+    public function renewMyItems($renewDetails)
+    {
+        $patron = $renewDetails['patron'];
+        $results = ['details' => [], 'blocks' => false ];
+        foreach ($renewDetails['details'] as $details) {
+            list($checkoutId, $itemId) = explode('|', $details);
+            try {
+                $renew = $this->makeRequest('/checkouts/' . $checkoutId, 'PUT');
+                $results['details'][$itemId] = [
+                    'success' => true,
+                    'new_date' => $this->formatDate($renew->date_due),
+                    'item_id' => $itemId,
+                ];
+
+            } catch (ILSException $e) {
+                $results['details'][$itemId] = [
+                    'success' => false,
+                    'item_id' => $itemId,
+                ];
+            }
+        }
+        return $results;
+    }
+
 }
