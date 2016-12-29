@@ -196,6 +196,18 @@ class Factory
     }
 
     /**
+     * Factory for KohaRESTful driver.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return KohaILSDI
+     */
+    public static function getKohaRESTful(ServiceManager $sm)
+    {
+        return new KohaRESTful($sm->getServiceLocator()->get('VuFind\DateConverter'));
+    }
+
+    /**
      * Factory for Unicorn driver.
      *
      * @param ServiceManager $sm Service manager.
