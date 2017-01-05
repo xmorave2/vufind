@@ -238,4 +238,16 @@ class Factory
         );
         return $vr;
     }
+
+	/**
+     * Factory for KohaRESTful driver.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return KohaRESTful
+     */
+    public static function getKohaRESTful(ServiceManager $sm)
+    {
+        return new KohaRESTful($sm->getServiceLocator()->get('VuFind\DateConverter'));
+    }
 }

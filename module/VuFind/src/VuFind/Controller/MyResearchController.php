@@ -1499,12 +1499,59 @@ class MyResearchController extends AbstractBase
             // locations, they are not supported and we should ignore them.
         }
 
-	/*
-	$kohaApi = '';
-	$summary = $kohaApi->getSummary($patron);
-	$view->sumary = $summary;
-	*/
+		//$summary = $catalog->getSummary($patron);
+/*
+		$view->hasEmail = ($patron['email'] !== "Unknown") ? true : false;
+		$view->patron = $patron;
+		$view->user = $user;
+*/
+
+		$user = $catalog->getMyProfile($patron);
+
+		$view->userHasEmail = (! empty($patron['email'])) ? $patron['email'] : false;
+		$view->userHasPhone = (! empty($user['phone'])) ? $user['phone'] : false;
 
         return $view;
+    }
+
+	/**
+     * User's checked out items history
+     *
+     * @return mixed
+     */
+    public function itemsHistoryAction()
+    {
+        // Stop now if the user does not have valid catalog credentials available:
+        if (!is_array($patron = $this->catalogLogin())) {
+            return $patron;
+        }
+
+        // User must be logged in at this point, so we can assume this is non-false:
+        $user = $this->getUser();
+
+        // Process home library parameter (if present):
+        $homeLibrary = $this->params()->fromPost('home_library', false);
+        if (!empty($homeLibrary)) {
+            $user->changeHomeLibrary($homeLibrary);
+            $this->getAuthManager()->updateSession($user);
+            $this->flashMessenger()->addMessage('profile_update', 'success');
+        }
+
+        // Begin building view object:
+        $view = $this->createViewModel();
+		$view->setTemplate('myresearch/items-history');
+
+        // Obtain user information from ILS:
+        $catalog = $this->getILS();
+        $profile = $catalog->getMyProfile($patron);
+        $profile['home_library'] = $user->home_library;
+        $view->profile = $profile;
+		$user = $catalog->getMyProfile($patron);
+
+		// Get patron items history
+		$itemsHistory = $catalog->getItemsHistory($patron);
+		$view->itemsHistory = $itemsHistory;
+
+		return $view;
     }
 }

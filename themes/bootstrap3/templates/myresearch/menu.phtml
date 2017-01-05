@@ -21,6 +21,11 @@
         <i class="fa fa-fw fa-flag" aria-hidden="true"></i> <?=$this->transEsc('Holds and Recalls')?>
       </a>
     <? endif; ?>
+	<? $user = $this->auth()->isLoggedIn(); if ($user): ?>
+    <a href="<?=$this->url('myresearch-itemshistory')?>" class="list-group-item<?=$this->active == 'itemshistory' ? ' active' : ''?>">
+      <i class="fa fa-fw fa-barcode" aria-hidden="true"></i> <?=$this->translate("Checked Out Items History")?>
+    </a>
+    <? endif; ?>
     <? if ($this->ils()->checkFunction('StorageRetrievalRequests')): ?>
       <a href="<?=$this->url('myresearch-storageretrievalrequests')?>" class="list-group-item<?=$this->active == 'storageRetrievalRequests' ? ' active' : ''?>">
         <i class="fa fa-fw fa-archive" aria-hidden="true"></i> <?=$this->transEsc('Storage Retrieval Requests')?>
