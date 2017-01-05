@@ -51,6 +51,11 @@
         <i class="fa fa-fw fa-barcode" aria-hidden="true"></i> <?=$this->transEsc('Library Cards')?>
       </a>
     <? endif; ?>
+  <? $user = $this->auth()->isLoggedIn(); if ($user): ?>
+    <a href="<?=$this->url('myresearch-purchaseproposal')?>" class="list-group-item<?=$this->active == 'purchaseproposal' ? ' active' : ''?>">
+      <i class="fa fa-fw fa-money" aria-hidden="true"></i> <?=$this->transEsc('Purchase proposal')?>
+    </a>
+  <? endif; ?>
   <? endif; ?>
   <? if ($this->accountCapabilities()->getSavedSearchSetting() === 'enabled'): ?>
     <a href="<?=$this->url('search-history')?>?require_login" class="list-group-item<?=$this->active == 'history' ? ' active' : ''?>">

@@ -1548,4 +1548,34 @@ class MyResearchController extends AbstractBase
 
 		return $view;
     }
+
+	/**
+     * Purchase proposal
+     *
+     * @return mixed
+     */
+    public function purchaseProposalAction()
+    {
+        // Stop now if the user does not have valid catalog credentials available:
+        if (!is_array($patron = $this->catalogLogin())) {
+            return $patron;
+        }
+
+        // User must be logged in at this point, so we can assume this is non-false:
+        $user = $this->getUser();
+
+        // Process home library parameter (if present):
+        $homeLibrary = $this->params()->fromPost('home_library', false);
+        if (!empty($homeLibrary)) {
+            $user->changeHomeLibrary($homeLibrary);
+            $this->getAuthManager()->updateSession($user);
+            $this->flashMessenger()->addMessage('profile_update', 'success');
+        }
+
+        // Begin building view object:
+        $view = $this->createViewModel();
+		$view->setTemplate('myresearch/purchase-proposal');
+
+		return $view;
+    }
 }

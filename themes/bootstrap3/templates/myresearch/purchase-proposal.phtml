@@ -1,0 +1,41 @@
+<?
+    // Set up page title:
+    $this->headTitle($this->translate('Purchase proposal'));
+
+    // Set up breadcrumbs:
+    $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-purchaseproposal') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Purchase proposal') . '</li>';
+
+    // Template for use by the renderArray helper:
+    $arrTemplate = '<tr><th>%%LABEL%%:</th><td> %%VALUE%%</td></tr>';
+?>
+
+<div class="row">
+  <div class="<?=$this->layoutClass('mainbody')?>">
+    <h2><?=$this->transEsc('Purchase proposal')?></h2>
+    <?=$this->flashmessages();?>
+
+    <div class='row'>
+
+      <div class="col-sm-12">
+	  <div class="panel-body">
+	    <form action="?" method="post">
+		  <div class="form-group">
+			<label for="title"><?=$this->translate('Title')?></label>
+			<input class="form-control" type="text" name="title" id="title" value="" placeholder="<?=$this->translate('Title')?>">
+		  </div>
+		  <div class="form-group">
+			<label for="note"><?=$this->translate('Note')?></label>
+			<textarea class="form-control" name="note" id="note"></textarea>
+		  </div>
+			<button class="btn btn-default" type="submit"><?=$this->translate('request_submit_text')?></button>
+		</form>
+	  </div>
+	</div>
+  </div>
+
+</div>
+
+  <div class="<?=$this->layoutClass('sidebar')?>">
+    <?=$this->context($this)->renderInContext("myresearch/menu.phtml", array('active' => 'purchaseproposal'))?>
+  </div>
+</div>
