@@ -1068,16 +1068,16 @@ class MyResearchController extends AbstractBase
      *
      * @return mixed
      */
-    public function checkedoutAction()
+     public function checkedoutAction()
     {
         // Stop now if the user does not have valid catalog credentials available:
         if (!is_array($patron = $this->catalogLogin())) {
             return $patron;
         }
-
         // Connect to the ILS:
         $catalog = $this->getILS();
-
+        // Display account blocks, if any:
+        $this->addAccountBlocksToFlashMessenger($catalog, $patron);
         // Get the current renewal status and process renewal form, if necessary:
         $renewStatus = $catalog->checkFunction('Renewals', compact('patron'));
         $renewResult = $renewStatus
@@ -1085,18 +1085,14 @@ class MyResearchController extends AbstractBase
                 $this->getRequest()->getPost(), $catalog, $patron
             )
             : [];
-
         // By default, assume we will not need to display a renewal form:
         $renewForm = false;
-
         // Get checked out item details:
         $result = $catalog->getMyTransactions($patron);
-
         // Get page size:
         $config = $this->getConfig();
         $limit = isset($config->Catalog->checked_out_page_size)
             ? $config->Catalog->checked_out_page_size : 50;
-
         // Build paginator if needed:
         if ($limit > 0 && $limit < count($result)) {
             $adapter = new \Zend\Paginator\Adapter\ArrayAdapter($result);
@@ -1110,7 +1106,6 @@ class MyResearchController extends AbstractBase
             $pageStart = 0;
             $pageEnd = count($result);
         }
-
         $transactions = $hiddenTransactions = [];
         foreach ($result as $i => $current) {
             // Add renewal details if appropriate:
@@ -1123,7 +1118,6 @@ class MyResearchController extends AbstractBase
                 // Enable renewal form if necessary:
                 $renewForm = true;
             }
-
             // Build record driver (only for the current visible page):
             if ($i >= $pageStart && $i <= $pageEnd) {
                 $transactions[] = $this->getDriverForILSRecord($current);
