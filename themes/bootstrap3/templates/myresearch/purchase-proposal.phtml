@@ -20,11 +20,47 @@
 	  <div class="panel-body">
 	    <form action="?" method="post">
 		  <div class="form-group">
-			<label for="title"><?=$this->translate('Title')?></label>
-			<input class="form-control" type="text" name="title" id="title" value="" placeholder="<?=$this->translate('Title')?>">
+			<label for="title"><?=$this->translate('Title')?>*</label>
+			<input class="form-control" type="text" name="title" id="title" value="" placeholder="<?=$this->translate('Title')?>" required>
 		  </div>
 		  <div class="form-group">
-			<label for="note"><?=$this->translate('Note')?></label>
+			<label for="author"><?=$this->translate('Author')?></label>
+			<input class="form-control" type="text" name="author" id="author" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="copyright"><?=$this->translate('Date of copyright registration')?></label>
+			<input class="form-control" type="text" name="copyright" id="copyright" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="standard_number"><?=$this->translate('Standard number')?></label>
+			<input class="form-control" type="text" name="standard_number" id="standard_number" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="publisher"><?=$this->translate('Publisher')?></label>
+			<input class="form-control" type="text" name="publisher" id="publisher" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="collection_title"><?=$this->translate('Collection title')?></label>
+			<input class="form-control" type="text" name="collection_title" id="collection_title" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="publication_place"><?=$this->translate('Publication_Place')?></label>
+			<input class="form-control" type="text" name="publication_place" id="publication_place" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="document_type"><?=$this->translate('Document Type')?></label>
+			<select class="form-control" name="document_type" id="document_type">
+			  <option value=""><?=$this->translate('Audiobooks')?></option>
+			</select>
+		  </div>
+		  <div class="form-group">
+			<label for="proposal_reason"><?=$this->translate('Proposal reason')?></label>
+			<select class="form-control" name="proposal_reason" id="proposal_reason">
+			  <option value="">-- <?=$this->translate('Select')?> --</option>
+			</select>
+		  </div>
+		  <div class="form-group">
+			<label for="note"><?=$this->translate('Notes')?></label>
 			<textarea class="form-control" name="note" id="note"></textarea>
 		  </div>
 			<button class="btn btn-default" type="submit"><?=$this->translate('request_submit_text')?></button>
