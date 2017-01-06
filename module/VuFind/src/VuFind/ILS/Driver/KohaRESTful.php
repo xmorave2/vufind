@@ -237,7 +237,7 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
     }
 
     /**
-     * Public Function which retrieves renew, hold and cancel settings from the
+     * Public Function which retrieves renew, hold, cancel and suggestion settings from the
      * driver ini file.
      *
      * @param string $function The name of the feature to be checked
@@ -247,6 +247,20 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
     public function getConfig($function)
     {
         $functionConfig = "";
+        if ($function == "suggestion") {
+            return [
+                "itemtypes" => [ // SUGGEST_FORMAT authorised value
+                    "KN" => "Kniha",
+                    "AK" => "Audiokniha",
+                    "MP" => "Mapy",
+                    "CA" => "Časopisy",
+                ],
+                "reasons"   => [ // SUGGEST authorised value
+                    "BSELL" => "Bestseller",
+                    "SCD"   => "Kniha na regále je poškozená",                    
+                ],
+            ];
+        }
         if (isset($this->config[$function])) {
             $functionConfig = $this->config[$function];
         } else {
@@ -661,5 +675,6 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
         }
         return $results;
     }
+
 
 }
