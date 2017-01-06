@@ -1,0 +1,82 @@
+<?
+    // Set up page title:
+    $this->headTitle($this->translate('Purchase suggestion'));
+
+    // Set up breadcrumbs:
+    $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-purchasesuggestion') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Purchase suggestion') . '</li>';
+
+    // Template for use by the renderArray helper:
+    $arrTemplate = '<tr><th>%%LABEL%%:</th><td> %%VALUE%%</td></tr>';
+?>
+
+<div class="row">
+  <div class="<?=$this->layoutClass('mainbody')?>">
+    <h2><?=$this->transEsc('Purchase suggestion')?></h2>
+    <?=$this->flashmessages();?>
+
+    <div class='row'>
+
+      <div class="col-sm-12">
+	  <div class="panel-body">
+	    <form action="?" method="post">
+		  <div class="form-group">
+			<label for="title"><?=$this->translate('Title')?>*</label>
+			<input class="form-control" type="text" name="title" id="title" value="" placeholder="<?=$this->translate('Title')?>" required>
+		  </div>
+		  <div class="form-group">
+			<label for="author"><?=$this->translate('Author')?></label>
+			<input class="form-control" type="text" name="author" id="author" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="copyrightdate"><?=$this->translate('Date of copyright registration')?></label>
+			<input class="form-control" type="text" name="copyrightdate" id="copyrightdate" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="isbn"><?=$this->translate('Standard number')?></label>
+			<input class="form-control" type="text" name="isbn" id="isbn" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="publishercode"><?=$this->translate('Publisher')?></label>
+			<input class="form-control" type="text" name="publishercode" id="publishercode" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="collectiontitle"><?=$this->translate('Collection title')?></label>
+			<input class="form-control" type="text" name="collectiontitle" id="collectiontitle" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="place"><?=$this->translate('Publication_Place')?></label>
+			<input class="form-control" type="text" name="place" id="place" value="">
+		  </div>
+		  <div class="form-group">
+			<label for="itemtype"><?=$this->translate('Document Type')?></label>
+			<select class="form-control" name="itemtype" id="itemtype">
+			  <? foreach($this->suggestions as $key => $suggestion): ?>
+			  <option value="<?=$key?>"><?=$this->translate($suggestion)?></option>
+			  <? endforeach; ?>
+			</select>
+		  </div>
+		  <div class="form-group">
+			<label for="patronreason"><?=$this->translate('Proposal reason')?></label>
+			<select class="form-control" name="patronreason" id="patronreason">
+			  <option value="">-- <?=$this->translate("Select")?> --</option>
+			  <? foreach($this->reasons as $key => $reason): ?>
+			  <option value="<?=$key?>"><?=$this->translate($reason)?></option>
+			  <? endforeach; ?>
+			</select>
+		  </div>
+		  <div class="form-group">
+			<label for="note"><?=$this->translate('Notes')?></label>
+			<textarea class="form-control" name="note" id="note"></textarea>
+		  </div>
+			<button class="btn btn-default" type="submit"><?=$this->translate('request_submit_text')?></button>
+		</form>
+	  </div>
+	</div>
+  </div>
+
+</div>
+
+  <div class="<?=$this->layoutClass('sidebar')?>">
+    <?=$this->context($this)->renderInContext("myresearch/menu.phtml", array('active' => 'purchasesuggestion'))?>
+  </div>
+</div>

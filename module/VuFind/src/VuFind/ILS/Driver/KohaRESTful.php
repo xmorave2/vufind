@@ -6,6 +6,7 @@
  *
  * Copyright (C) Josef Moravec, 2016.
  * Copyright (C) Jiri Kozlovsky, 2016.
+ * Copyright (C) Martin Kravec, 2016.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -24,6 +25,7 @@
  * @package  ILS_Drivers
  * @author   Josef Moravec <josef.moravec@gmail.com>
  * @author   Jiri Kozlovsky <@>
+ * @author   Martin Kravec <kravec.martin@gmail.com>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     https://vufind.org/wiki/development:plugins:ils_drivers Wiki
  */
@@ -214,7 +216,8 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
         } catch (\Exception $e) {
             throw new ILSException($e->getMessage());
         }
-        if (!$response->isSuccess()) {
+	
+	if (!$response->isSuccess()) {
             throw new ILSException("Error in communication with Koha API:" . $response->getBody() . 
                                    " HTTP status code: " . $response->getStatusCode() );
         }
@@ -290,7 +293,6 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
             $this->locations = $locations;
         }
         return $this->locations;
-     
     }
 
     /**
@@ -314,7 +316,7 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
         return $this->defaultLocation;
     }
 
-    /**
+    /*
      * Place Hold
      *
      * Attempts to place a hold or recall on a particular item and returns
@@ -509,6 +511,42 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
         return $checkoutsList;
     }
 
+	/**
+	 * Get Patron Items history
+	 *
+	 * This is responsible for retrieving all items history (i.e. checked out items)
+	 * by a specific patron.
+	 *
+	 * @param array $patron The patron array from patronLogin
+	 *
+	 * @throws \VuFind\Exception\Date
+	 * @throws ILSException
+	 * @return array        Array of the patron's items history on success.
+	 */
+	public function getItemsHistory($patron)
+	{
+	    $checkouts = $this->makeRESTfulRequest('/checkouts', 'GET', [ 'borrowernumber' => $patron['id'] ]);
+	    $checkoutsList = [];
+	    if($checkouts) {
+	        foreach ($checkouts as $checkout) {
+	            $item = $this->makeRESTfulRequest('/items/' . $checkout->itemnumber);
+
+	            $checkoutsList[] = [
+	                'duedate'           => $this->formatDate($checkout->date_due),
+	                'id'                => $item ? $item->biblionumber : 0,
+	                'item_id'           => $checkout->itemnumber,
+	                'barcode'           => $item ? $item->barcode : 0,
+	                'renew'             => $checkout->renewals,
+	                'borrowingLocation' => $checkout->branchcode, //TODO: add branch name
+	            ];
+	   
+	        }
+	    }
+
+		$checkoutsList[] = $checkouts;
+	    return $checkoutsList;
+	}
+
     /** Get Patron Holds
      *
      */
@@ -527,7 +565,6 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
                     'available'  => $hold->found,
                     'item_id'    => $hold->itemnumber,
                     'reserve_id' => $hold->reserve_id,
-
                 ];
             }
         }
@@ -544,8 +581,39 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
 
 
     /**
-     * Insert Suggestion
+     * Insert purchase suggestion
+	 *
+	 * @param array $patron	Patron information returned by the patronLogin method.
+	 * @param array $purchaseSuggestion
+	 *
+	 * @FIXME Rewrite param $purchaseSuggestion from Array to Object
+	 *
+	 * @throws ILSException
+	 * @return void
      */
+	public function insertSuggestion(array $patron, array $purchaseSuggestion)
+	{
+		try {
+			 $this->makeRESTfulRequest(
+				'/suggestions/'.$patron['id'], 
+				'POST', 
+				[
+					'title' 			=> $purchaseSuggestion['title'],
+					'author' 			=> $purchaseSuggestion['author'],
+					'copyrightdate'		=> $purchaseSuggestion['copyrightdate'],
+					'isbn' 				=> $purchaseSuggestion['isbn'],
+					'publishercode' 	=> $purchaseSuggestion['publishercode'],
+					'collectiontitle' 	=> $purchaseSuggestion['collectiontitle'],
+					'place' 			=> $purchaseSuggestion['place'],
+					'itemtype' 			=> $purchaseSuggestion['itemtype'],
+					'patronreason' 		=> $purchaseSuggestion['patronreason'],
+					'note' 				=> $purchaseSuggestion['note']
+				]
+			);
+		} catch (\Exception $e) {
+			throw new ILSException($e->getMessage());
+		}
+	}
 
     /** Get Holdings
      *
@@ -675,6 +743,4 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
         }
         return $results;
     }
-
-
 }

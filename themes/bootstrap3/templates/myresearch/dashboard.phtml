@@ -1,0 +1,140 @@
+<?
+    // Set up page title:
+    $this->headTitle($this->translate('Dashboard'));
+
+    // Set up breadcrumbs:
+    $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Dashboard') . '</li>';
+
+    // Template for use by the renderArray helper:
+    $arrTemplate = '<tr><th>%%LABEL%%:</th><td> %%VALUE%%</td></tr>';
+?>
+
+<div class="row">
+  <div class="<?=$this->layoutClass('mainbody')?>">
+    <h2><?=$this->transEsc('Dashboard')?></h2>
+    <?=$this->flashmessages();?>
+
+    <? if ($this->userHasEmail): ?>
+    <div class="row">
+      <div class="alert alert-warning">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+        <?=$this->translate("Missing email please fill in contact adress")?>. <strong><a href="<?=$this->url('myresearch-profile')?>"><?=$this->translate("Fill")?></strong></a>
+      </div>
+    </div>
+    <? endif; ?>
+
+	<? if ($this->userHasPhone): ?>
+    <div class="row">
+      <div class="alert alert-warning">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+        <?=$this->translate("Missing phone number please fill in contact number")?>. <strong><a href="<?=$this->url('myresearch-profile')?>"><?=$this->translate("Fill")?></strong></a>
+      </div>
+    </div>
+    <? endif; ?>
+
+    <div class='row'>
+
+      <div class="col-sm-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Checkedout")?></h3>
+	  </div>
+	  <div class="panel-body">
+	    <h1 class="text-center">15</h1> 
+	    <p class="text-center"><span class="label label-danger">3</span> <?=$this->translate("should be returned until tomorrow")?></p>
+	    <p class="text-center"><span class="label label-warning">3</span> <?=$this->translate("cannot be prolonged")?></p>
+	    <p class="text-center"><span class="label label-warning">1</span> <?=$this->translate("days left to the closest return")?></p>
+	    <p><a class="btn btn-warning btn-block" href="#"><?=$this->translate("Renew")?></a></p>
+	    <p><a class="btn btn-info btn-block" href="<?=$this->url('myresearch-checkedout')?>"><?=$this->translate("Show all")?></a></p>
+	  </div>
+	</div>
+      </div>
+
+      <div class="col-sm-4">
+		<div class="panel panel-default">
+		  <div class="panel-heading">
+			<h3 class="panel-title"><?=$this->translate("My Holds")?></h3>
+		  </div>
+		  <div class="panel-body">
+			<h1 class="text-center">3</h1> 
+			<p class="text-center"><span class="label label-default">1</span> <?=$this->translate("waiting for pick up")?></p>
+			
+			<p><a class="btn btn-info btn-block" href="<?=$this->url('myresearch-holds')?>"><?=$this->translate("Show all")?></a></p>
+		  </div>
+		</div>
+      </div> 
+
+      <div class="col-sm-4">
+		<div class="panel panel-default">
+		  <div class="panel-heading">
+			<h3 class="panel-title"><?=$this->translate("Fines")?></h3>
+		  </div>
+		  <div class="panel-body">
+			<h1 class="text-center">120</h1>
+			<p><a class="btn btn-warning btn-block" href="#"><?=$this->translate("Pay all unpaid")?></a></p>
+			<p><a class="btn btn-info btn-block" href="<?=$this->url('myresearch-fines')?>"><?=$this->translate("Show all unpaid")?></a></p>
+		  </div>
+		</div>
+      </div>
+
+    </div>
+    <div class="row">
+
+    <div class="col-sm-4">
+	  <div class="panel panel-default">
+	    <div class="panel-heading">
+	      <h3 class="panel-title"><?=$this->translate("Checked Out Items History")?></h3>
+	    </div>
+	    <div class="panel-body">
+	      <h1 class="text-center">2 758</h1>
+	      <p class="text-center"><strong>10</strong> <?=$this->translate("checkedouts this month")?></p>
+	      <p class="text-center"><strong>6</strong> <?=$this->translate("checkedouts this year")?></p>
+	      <p><a class="btn btn-info btn-block" href="<?=$this->url('myresearch-itemshistory')?>"><?=$this->translate("Show all")?></a></p>
+	    </div>
+	  </div>
+    </div>
+
+
+      <div class="col-sm-4">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Favorite authors")?> <a href="#" data-toggle="tooltip" title="<?=$this->translate("favorite_authors_tooltip")?>"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h3>
+	  </div>
+	  <div class="panel-body">
+	    <ul class="list-group">
+	      <li class="list-group-item">Name Surname</li>
+	      <li class="list-group-item">Name Surname</li>
+	      <li class="list-group-item">Name Surname</li>
+	    </ul>
+	  </div>
+	</div>
+      </div>
+
+    <div class="col-sm-4">
+	<div class="panel panel-default">
+	  <div class="panel-heading">
+	    <h3 class="panel-title"><?=$this->translate("Favorite topics")?> <a href="#" data-toggle="tooltip" title="<?=$this->translate("favorite_topics_tooltip")?>"><i class="fa fa-question-circle" aria-hidden="true"></i></a></h3>
+	  </div>
+	  <div class="panel-body">
+	    <ul class="list-group">
+	      <li class="list-group-item">Name Surname</li>
+	      <li class="list-group-item">Name Surname</li>
+	    </ul>
+	  </div>
+	</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="<?=$this->layoutClass('sidebar')?>">
+    <?=$this->context($this)->renderInContext("myresearch/menu.phtml", array('active' => 'dashboard'))?>
+  </div>
+</div>
+
+<script>
+	jQuery( document ).ready( function( $ ) {
+		$('[data-toggle="tooltip"]').tooltip();   
+	});
+</script>

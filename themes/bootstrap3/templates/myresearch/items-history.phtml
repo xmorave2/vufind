@@ -1,0 +1,98 @@
+<?
+    // Set up page title:
+    $this->headTitle($this->translate('Checked Out Items History'));
+
+    // Set up breadcrumbs:
+    $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Checked Out Items History') . '</li>';
+
+    // Template for use by the renderArray helper:
+    $arrTemplate = '<tr><th>%%LABEL%%:</th><td> %%VALUE%%</td></tr>';
+?>
+
+<div class="row">
+  <div class="<?=$this->layoutClass('mainbody')?>">
+    <h2><?=$this->transEsc('Checked Out Items History')?></h2>
+    <?=$this->flashmessages();?>
+
+    <div class='row'>
+
+      <div class="col-sm-12">
+	  <div class="panel-body">
+	    <pre>
+	      <?
+			print_r($this->itemsHistory);
+		  ?>
+		</pre>
+		<table class="table table-striped">
+			<thead>
+			  <tr>
+				<th class="col-sm-2">
+				  <?=$this->translate('Date');?>
+				  <a href="#">
+					<i class="fa fa-long-arrow-up" aria-hidden="true"></i>
+				  </a>
+				  <a href="#">
+					<i class="fa fa-long-arrow-down" aria-hidden="true"></i>
+				  </a>
+				</th>
+				<th class="col-sm-2">
+				  <?=$this->translate('Title');?>
+				  <a href="#">
+					<i class="fa fa-long-arrow-up" aria-hidden="true"></i>
+				  </a>
+				  <a href="#">
+					<i class="fa fa-long-arrow-down" aria-hidden="true"></i>
+				  </a>
+				</th>
+				<th class="col-sm-3">
+				  <?=$this->translate('Author');?>
+				  <a href="#">
+					<i class="fa fa-long-arrow-up" aria-hidden="true"></i>
+				  </a>
+				  <a href="#">
+					<i class="fa fa-long-arrow-down" aria-hidden="true"></i>
+				  </a>
+				</th>
+			    <th class="col-sm-2"><?=$this->translate('Returned');?></th>
+			  </tr>
+			</thead>
+			<tbody>
+			  <tr>
+				<td>12. 05. 2056</td>
+				<td>Title</td>
+				<td>Author</td>
+				<td>12. 05. 2056</td>
+			  </tr>
+			<tr>
+				<td>12. 05. 2056</td>
+				<td>Title</td>
+				<td>Author</td>
+				<td>12. 05. 2056</td>
+			  </tr>
+			<tr>
+				<td>12. 05. 2056</td>
+				<td>Title</td>
+				<td>Author</td>
+				<td>12. 05. 2056</td>
+			  </tr>
+			</tbody>
+		  </table>
+		  <div class="text-center">
+		    <ul class="pagination center">
+			  <li><a href="#">1</a></li>
+			  <li><a href="#">2</a></li>
+			  <li><a href="#">3</a></li>
+			  <li><a href="#">4</a></li>
+			  <li><a href="#">5</a></li>
+		    </ul>
+		  </div>
+	  </div>
+	</div>
+  </div>
+
+</div>
+
+  <div class="<?=$this->layoutClass('sidebar')?>">
+    <?=$this->context($this)->renderInContext("myresearch/menu.phtml", array('active' => 'itemshistory'))?>
+  </div>
+</div>

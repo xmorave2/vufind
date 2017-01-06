@@ -1093,38 +1093,33 @@ class MyResearchController extends AbstractBase
      *
      * @return mixed
      */
-    public function checkedoutAction()
+     public function checkedoutAction()
     {
         // Stop now if the user does not have valid catalog credentials available:
         if (!is_array($patron = $this->catalogLogin())) {
             return $patron;
         }
-
         // Connect to the ILS:
         $catalog = $this->getILS();
-
-        // Display account blocks, if any:
+	
+	// Display account blocks, if any:
         $this->addAccountBlocksToFlashMessenger($catalog, $patron);
-
-        // Get the current renewal status and process renewal form, if necessary:
+	
+	// Get the current renewal status and process renewal form, if necessary:
         $renewStatus = $catalog->checkFunction('Renewals', compact('patron'));
         $renewResult = $renewStatus
             ? $this->renewals()->processRenewals(
                 $this->getRequest()->getPost(), $catalog, $patron
             )
             : [];
-
         // By default, assume we will not need to display a renewal form:
         $renewForm = false;
-
         // Get checked out item details:
         $result = $catalog->getMyTransactions($patron);
-
         // Get page size:
         $config = $this->getConfig();
         $limit = isset($config->Catalog->checked_out_page_size)
             ? $config->Catalog->checked_out_page_size : 50;
-
         // Build paginator if needed:
         if ($limit > 0 && $limit < count($result)) {
             $adapter = new \Zend\Paginator\Adapter\ArrayAdapter($result);
@@ -1138,7 +1133,6 @@ class MyResearchController extends AbstractBase
             $pageStart = 0;
             $pageEnd = count($result);
         }
-
         $transactions = $hiddenTransactions = [];
         foreach ($result as $i => $current) {
             // Add renewal details if appropriate:
@@ -1151,7 +1145,6 @@ class MyResearchController extends AbstractBase
                 // Enable renewal form if necessary:
                 $renewForm = true;
             }
-
             // Build record driver (only for the current visible page):
             if ($i >= $pageStart && $i <= $pageEnd) {
                 $transactions[] = $this->getDriverForILSRecord($current);
@@ -1507,5 +1500,135 @@ class MyResearchController extends AbstractBase
         if (!empty($method)) {
             $this->getAuthManager()->setAuthMethod($method);
         }
+    }
+
+    /**
+     * User's dashboard
+     *
+     * @return mixed
+     */
+    public function dashboardAction()
+    {
+        // Stop now if the user does not have valid catalog credentials available:
+        if (!is_array($patron = $this->catalogLogin())) {
+            return $patron;
+        }
+
+        // User must be logged in at this point, so we can assume this is non-false:
+        $user = $this->getUser();
+
+        // Process home library parameter (if present):
+        $homeLibrary = $this->params()->fromPost('home_library', false);
+        if (!empty($homeLibrary)) {
+            $user->changeHomeLibrary($homeLibrary);
+            $this->getAuthManager()->updateSession($user);
+            $this->flashMessenger()->addMessage('profile_update', 'success');
+        }
+
+        // Begin building view object:
+        $view = $this->createViewModel();
+
+        // Obtain user information from ILS:
+        $catalog = $this->getILS();
+        $profile = $catalog->getMyProfile($patron);
+        $profile['home_library'] = $user->home_library;
+        $view->profile = $profile;
+        try {
+            $view->pickup = $catalog->getPickUpLocations($patron);
+            $view->defaultPickupLocation
+                = $catalog->getDefaultPickUpLocation($patron);
+        } catch (\Exception $e) {
+            // Do nothing; if we're unable to load information about pickup
+            // locations, they are not supported and we should ignore them.
+        }
+
+		//$summary = $catalog->getSummary($patron);
+/*
+		$view->hasEmail = ($patron['email'] !== "Unknown") ? true : false;
+		$view->patron = $patron;
+		$view->user = $user;
+*/
+
+		$user = $catalog->getMyProfile($patron);
+
+		$view->userHasEmail = (! empty($patron['email'])) ? $patron['email'] : false;
+		$view->userHasPhone = (! empty($user['phone'])) ? $user['phone'] : false;
+
+        return $view;
+    }
+
+	/**
+     * User's checked out items history
+     *
+     * @return mixed
+     */
+    public function itemsHistoryAction()
+    {
+        // Stop now if the user does not have valid catalog credentials available:
+        if (!is_array($patron = $this->catalogLogin())) {
+            return $patron;
+        }
+
+        // User must be logged in at this point, so we can assume this is non-false:
+        $user = $this->getUser();
+
+        // Process home library parameter (if present):
+        $homeLibrary = $this->params()->fromPost('home_library', false);
+        if (!empty($homeLibrary)) {
+            $user->changeHomeLibrary($homeLibrary);
+            $this->getAuthManager()->updateSession($user);
+            $this->flashMessenger()->addMessage('profile_update', 'success');
+        }
+
+        // Begin building view object:
+        $view = $this->createViewModel();
+		$view->setTemplate('myresearch/items-history');
+
+        // Obtain user information from ILS:
+        $catalog = $this->getILS();
+        $profile = $catalog->getMyProfile($patron);
+        $profile['home_library'] = $user->home_library;
+        $view->profile = $profile;
+		$user = $catalog->getMyProfile($patron);
+
+		// Get patron items history
+		$itemsHistory = $catalog->getItemsHistory($patron);
+		$view->itemsHistory = $itemsHistory;
+
+		return $view;
+    }
+
+	/**
+     * Purchase proposal
+     *
+     * @return mixed
+     */
+    public function purchaseSuggestionAction()
+    {
+        // Stop now if the user does not have valid catalog credentials available:
+        if (!is_array($patron = $this->catalogLogin())) {
+            return $patron;
+        }
+
+        // User must be logged in at this point, so we can assume this is non-false:
+        $user = $this->getUser();
+
+        // Process home library parameter (if present):
+        $homeLibrary = $this->params()->fromPost('home_library', false);
+        if (!empty($homeLibrary)) {
+            $user->changeHomeLibrary($homeLibrary);
+            $this->getAuthManager()->updateSession($user);
+            $this->flashMessenger()->addMessage('profile_update', 'success');
+        }
+
+        // Begin building view object:
+        $view = $this->createViewModel();
+		$view->setTemplate('myresearch/purchase-suggestion');
+
+		$catalog = $this->getILS();
+		$view->suggestions = $catalog->getConfig("suggestion")['itemtypes'];
+		$view->reasons = $catalog->getConfig("suggestion")['reasons'];
+
+		return $view;
     }
 }
