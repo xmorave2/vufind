@@ -1576,6 +1576,10 @@ class MyResearchController extends AbstractBase
         $view = $this->createViewModel();
 		$view->setTemplate('myresearch/purchase-proposal');
 
+		$catalog = $this->getILS();
+		$view->suggestions = $catalog->getConfig("suggestion")['itemtypes'];
+		$view->reasons = $catalog->getConfig("suggestion")['reasons'];
+
 		return $view;
     }
 }

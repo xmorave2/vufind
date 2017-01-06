@@ -50,13 +50,18 @@
 		  <div class="form-group">
 			<label for="document_type"><?=$this->translate('Document Type')?></label>
 			<select class="form-control" name="document_type" id="document_type">
-			  <option value=""><?=$this->translate('Audiobooks')?></option>
+			  <? foreach($this->suggestions as $key => $suggestion): ?>
+			  <option value="<?=$key?>"><?=$this->translate($suggestion)?></option>
+			  <? endforeach; ?>
 			</select>
 		  </div>
 		  <div class="form-group">
 			<label for="proposal_reason"><?=$this->translate('Proposal reason')?></label>
 			<select class="form-control" name="proposal_reason" id="proposal_reason">
-			  <option value="">-- <?=$this->translate('Select')?> --</option>
+			  <option value="">-- <?=$this->translate("Select")?> --</option>
+			  <? foreach($this->reasons as $key => $reason): ?>
+			  <option value="<?=$key?>"><?=$this->translate($reason)?></option>
+			  <? endforeach; ?>
 			</select>
 		  </div>
 		  <div class="form-group">
