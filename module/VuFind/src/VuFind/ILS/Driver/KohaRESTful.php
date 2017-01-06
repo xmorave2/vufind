@@ -581,8 +581,39 @@ class KohaRESTful extends \VuFind\ILS\Driver\KohaILSDI implements
 //        $fines = $this->makeRESTfulRequest('/');
  
     /**
-     * Insert Suggestion
+     * Insert purchase suggestion
+	 *
+	 * @param array $patron	Patron information returned by the patronLogin method.
+	 * @param array $purchaseSuggestion
+	 *
+	 * @FIXME Rewrite param $purchaseSuggestion from Array to Object
+	 *
+	 * @throws ILSException
+	 * @return void
      */
+	public function insertSuggestion(array $patron, array $purchaseSuggestion)
+	{
+		try {
+			 $this->makeRESTfulRequest(
+				'/suggestions/'.$patron['id'], 
+				'POST', 
+				[
+					'title' 			=> $purchaseSuggestion['title'],
+					'author' 			=> $purchaseSuggestion['author'],
+					'copyrightdate'		=> $purchaseSuggestion['copyrightdate'],
+					'isbn' 				=> $purchaseSuggestion['isbn'],
+					'publishercode' 	=> $purchaseSuggestion['publishercode'],
+					'collectiontitle' 	=> $purchaseSuggestion['collectiontitle'],
+					'place' 			=> $purchaseSuggestion['place'],
+					'itemtype' 			=> $purchaseSuggestion['itemtype'],
+					'patronreason' 		=> $purchaseSuggestion['patronreason'],
+					'note' 				=> $purchaseSuggestion['note']
+				]
+			);
+		} catch (\Exception $e) {
+			throw new ILSException($e->getMessage());
+		}
+	}
 
     /** Get Holdings
      *

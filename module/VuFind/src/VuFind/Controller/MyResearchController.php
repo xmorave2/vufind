@@ -1554,7 +1554,7 @@ class MyResearchController extends AbstractBase
      *
      * @return mixed
      */
-    public function purchaseProposalAction()
+    public function purchaseSuggestionAction()
     {
         // Stop now if the user does not have valid catalog credentials available:
         if (!is_array($patron = $this->catalogLogin())) {
@@ -1574,7 +1574,7 @@ class MyResearchController extends AbstractBase
 
         // Begin building view object:
         $view = $this->createViewModel();
-		$view->setTemplate('myresearch/purchase-proposal');
+		$view->setTemplate('myresearch/purchase-suggestion');
 
 		$catalog = $this->getILS();
 		$view->suggestions = $catalog->getConfig("suggestion")['itemtypes'];

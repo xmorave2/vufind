@@ -775,7 +775,7 @@ $staticRoutes = [
     'MyResearch/Recover', 'MyResearch/SaveSearch',
     'MyResearch/StorageRetrievalRequests', 'MyResearch/UserLogin',
     'MyResearch/Verify', 'MyResearch/Dashboard', 'MyResearch/ItemsHistory',
-    'Primo/Advanced', 'Primo/Home', 'Primo/Search', 'MyResearch/PurchaseProposal',
+    'Primo/Advanced', 'Primo/Home', 'Primo/Search', 'MyResearch/PurchaseSuggestion',
     'QRCode/Show', 'QRCode/Unavailable',
     'OAI/Server', 'Pazpar2/Home', 'Pazpar2/Search', 'Records/Home',
     'Search/Advanced', 'Search/Email', 'Search/FacetList', 'Search/History',

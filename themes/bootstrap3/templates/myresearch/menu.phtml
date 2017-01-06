@@ -52,8 +52,8 @@
       </a>
     <? endif; ?>
   <? $user = $this->auth()->isLoggedIn(); if ($user): ?>
-    <a href="<?=$this->url('myresearch-purchaseproposal')?>" class="list-group-item<?=$this->active == 'purchaseproposal' ? ' active' : ''?>">
-      <i class="fa fa-fw fa-money" aria-hidden="true"></i> <?=$this->transEsc('Purchase proposal')?>
+    <a href="<?=$this->url('myresearch-purchasesuggestion')?>" class="list-group-item<?=$this->active == 'purchasesuggestion' ? ' active' : ''?>">
+      <i class="fa fa-fw fa-money" aria-hidden="true"></i> <?=$this->transEsc('Purchase suggestion')?>
     </a>
   <? endif; ?>
   <? endif; ?>

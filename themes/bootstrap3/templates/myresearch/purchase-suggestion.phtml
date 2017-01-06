@@ -1,9 +1,9 @@
 <?
     // Set up page title:
-    $this->headTitle($this->translate('Purchase proposal'));
+    $this->headTitle($this->translate('Purchase suggestion'));
 
     // Set up breadcrumbs:
-    $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-purchaseproposal') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Purchase proposal') . '</li>';
+    $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-purchasesuggestion') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Purchase suggestion') . '</li>';
 
     // Template for use by the renderArray helper:
     $arrTemplate = '<tr><th>%%LABEL%%:</th><td> %%VALUE%%</td></tr>';
@@ -11,7 +11,7 @@
 
 <div class="row">
   <div class="<?=$this->layoutClass('mainbody')?>">
-    <h2><?=$this->transEsc('Purchase proposal')?></h2>
+    <h2><?=$this->transEsc('Purchase suggestion')?></h2>
     <?=$this->flashmessages();?>
 
     <div class='row'>
@@ -28,36 +28,36 @@
 			<input class="form-control" type="text" name="author" id="author" value="">
 		  </div>
 		  <div class="form-group">
-			<label for="copyright"><?=$this->translate('Date of copyright registration')?></label>
-			<input class="form-control" type="text" name="copyright" id="copyright" value="">
+			<label for="copyrightdate"><?=$this->translate('Date of copyright registration')?></label>
+			<input class="form-control" type="text" name="copyrightdate" id="copyrightdate" value="">
 		  </div>
 		  <div class="form-group">
-			<label for="standard_number"><?=$this->translate('Standard number')?></label>
-			<input class="form-control" type="text" name="standard_number" id="standard_number" value="">
+			<label for="isbn"><?=$this->translate('Standard number')?></label>
+			<input class="form-control" type="text" name="isbn" id="isbn" value="">
 		  </div>
 		  <div class="form-group">
-			<label for="publisher"><?=$this->translate('Publisher')?></label>
-			<input class="form-control" type="text" name="publisher" id="publisher" value="">
+			<label for="publishercode"><?=$this->translate('Publisher')?></label>
+			<input class="form-control" type="text" name="publishercode" id="publishercode" value="">
 		  </div>
 		  <div class="form-group">
-			<label for="collection_title"><?=$this->translate('Collection title')?></label>
-			<input class="form-control" type="text" name="collection_title" id="collection_title" value="">
+			<label for="collectiontitle"><?=$this->translate('Collection title')?></label>
+			<input class="form-control" type="text" name="collectiontitle" id="collectiontitle" value="">
 		  </div>
 		  <div class="form-group">
-			<label for="publication_place"><?=$this->translate('Publication_Place')?></label>
-			<input class="form-control" type="text" name="publication_place" id="publication_place" value="">
+			<label for="place"><?=$this->translate('Publication_Place')?></label>
+			<input class="form-control" type="text" name="place" id="place" value="">
 		  </div>
 		  <div class="form-group">
-			<label for="document_type"><?=$this->translate('Document Type')?></label>
-			<select class="form-control" name="document_type" id="document_type">
+			<label for="itemtype"><?=$this->translate('Document Type')?></label>
+			<select class="form-control" name="itemtype" id="itemtype">
 			  <? foreach($this->suggestions as $key => $suggestion): ?>
 			  <option value="<?=$key?>"><?=$this->translate($suggestion)?></option>
 			  <? endforeach; ?>
 			</select>
 		  </div>
 		  <div class="form-group">
-			<label for="proposal_reason"><?=$this->translate('Proposal reason')?></label>
-			<select class="form-control" name="proposal_reason" id="proposal_reason">
+			<label for="patronreason"><?=$this->translate('Proposal reason')?></label>
+			<select class="form-control" name="patronreason" id="patronreason">
 			  <option value="">-- <?=$this->translate("Select")?> --</option>
 			  <? foreach($this->reasons as $key => $reason): ?>
 			  <option value="<?=$key?>"><?=$this->translate($reason)?></option>
@@ -77,6 +77,6 @@
 </div>
 
   <div class="<?=$this->layoutClass('sidebar')?>">
-    <?=$this->context($this)->renderInContext("myresearch/menu.phtml", array('active' => 'purchaseproposal'))?>
+    <?=$this->context($this)->renderInContext("myresearch/menu.phtml", array('active' => 'purchasesuggestion'))?>
   </div>
 </div>
