@@ -9,6 +9,11 @@ $config = [
                     'solrmarc' => 'Ereading\RecordDriver\Factory::getSolrMarc',
                 ],
             ],
+            'db_table' => [
+                'invokables' => [
+                    'EbookIssues' => 'Ereading\Db\Table\EbookIssues',
+                ]
+            ],
         ],
     ],
     'controllers' => [
