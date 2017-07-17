@@ -4,7 +4,7 @@
  * These set of functions is for adding information needed for e-book lending service 
  * through ereading.cz platform
  *
- * Copyright 2015-2016 Josef Moravec
+ * Copyright 2015-2017 Josef Moravec
  */
 
 import org.marc4j.marc.Record;
@@ -146,5 +146,32 @@ public Set getEreadingPreviewMobi(Record record){
     return getEreadingField(getEAN(record), "PREVIEW_MOBI");
 }
 
+/**
+ * Get merged location
+ *
+ * @param  Record    record
+ * @return Set
+ */
 
+public Set getMergedLocation(Record record) {
+    Set result = new LinkedHashSet();
+    List items = record.getVariableFields("993");
+    Set ereadingId = getEreadingField(getEAN(record), "ID");
+
+    if (!ereadingId.isEmpty()) {
+        result.add("eReading");
+    }
+
+    Iterator itemsIter = items.iterator();
+    DataField item;
+    while (itemsIter.hasNext()) {
+        item = (DataField) itemsIter.next();
+        Subfield itemLocation = item.getSubfield('l');
+        result.add(itemLocation.getData());
+    }
+    if (result.isEmpty()) {
+        result.add("Unknown");
+    }
+    return result;
+}
 
