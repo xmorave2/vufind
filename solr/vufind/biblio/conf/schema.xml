@@ -4,6 +4,7 @@
     <!-- Define fieldType long as it is needed by the _version_ field required by Solr 4.x -->
     <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="integer" class="solr.TrieIntField" precisionStep="0"/>
     <fieldType name="textFacet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
       <analyzer>
         <tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -218,6 +219,9 @@
    <!-- Local defined fields -->
    <field name="tematika" type="textFacet" indexed="true" stored="false" multiValued="true"/>
    <field name="availability" type="textFacet" indexed="true" stored="false" multiValued="true"/>
+   <!-- Série - dílovky -->
+   <field name="series787" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="series787_sort" type="integer" indexed="true" stored="true"/>
    <!-- Dynamic fields for customization without schema modification -->
    <dynamicField name="*_date" type="date" indexed="true" stored="true"/>
    <dynamicField name="*_date_mv" type="date" indexed="true" stored="true" multiValued="true"/>
