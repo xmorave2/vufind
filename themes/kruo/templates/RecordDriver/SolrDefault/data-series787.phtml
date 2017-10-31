@@ -1,0 +1,5 @@
+<? foreach($data as $field): ?>
+    <a href="<?=$this->record($this->driver)->getLink('series787', $field["title"])?>"><?=$this->escapeHtml($field["title"])?></a>, 
+    <?=$this->translate("part")?> <?=$field["part"]?><br/>
+<? endforeach;  ?>
+

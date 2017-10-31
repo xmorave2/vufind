@@ -1,0 +1,20 @@
+
+#login_target, label[for=login_target] {
+    display: none;
+}
+
+.checkboxFilter {
+    margin-bottom: 1rem;
+}
+
+.checkbox-filter {
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+    background-color: #fff;
+    line-height: 1.5rem;
+}
+
+.fullAvailability {
+    font-weight: bold;
+}
+
