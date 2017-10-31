@@ -863,15 +863,19 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
 
             $duedate_formatted = date_format(new \DateTime($duedate), "j. n. Y");
 
+            $branch = '';
+
             //Retrieving the full branch name
             if ($rowItem['HLDBRNCH'] == null) {
                 if ($rowItem['HOMEBRANCH'] == null) {
                     $loc = "Unknown";
                 } else {
                     $loc = $rowItem['LOCATION'];
+                    $branch = $rowItem['HOMEBRANCH'];
                 }
             } else {
                 $loc = $rowItem['LOCATION'];
+                $branch = $rowItem['HLDBRNCH'];
             }
 
             if ($loc != "Unknown") {
@@ -879,10 +883,10 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                               from branches
                               where branchcode = :branch";
                 $branchSqlStmt = $this->db->prepare($sqlBranch);
-                $branchSqlStmt->execute([':branch' => $loc]);
+                $branchSqlStmt->execute([':branch' => $branch]);
                 $row = $branchSqlStmt->fetch();
                 if ($row) {
-                    $loc = $row['BNAME'];
+                    $loc = $row['BNAME'] ." - " . $loc;
                 }
             }
 
@@ -1792,7 +1796,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 'cat_password' => $password,
                 'email'        => $this->getField($rsp->{'email'}),
                 'major'        => null,
-                'college'      => null,
+                'college'      => $this->getField($rsp->{'categorycode'}),
             ];
             return $profile;
         } else {
