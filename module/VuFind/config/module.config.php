@@ -187,6 +187,8 @@ $config = [
             'VuFind\ContentCoversPluginManager' => 'VuFind\Service\Factory::getContentCoversPluginManager',
             'VuFind\ContentExcerptsPluginManager' => 'VuFind\Service\Factory::getContentExcerptsPluginManager',
             'VuFind\ContentReviewsPluginManager' => 'VuFind\Service\Factory::getContentReviewsPluginManager',
+            'VuFind\ContentSummariesPluginManager' => 'VuFind\Service\Factory::getContentSummariesPluginManager',
+            'VuFind\ContentTOCPluginManager' => 'VuFind\Service\Factory::getContentTOCPluginManager',
             'VuFind\CookieManager' => 'VuFind\Service\Factory::getCookieManager',
             'VuFind\Cover\Router' => 'VuFind\Service\Factory::getCoverRouter',
             'VuFind\DateConverter' => 'VuFind\Service\Factory::getDateConverter',
@@ -224,6 +226,7 @@ $config = [
             'VuFind\Role\PermissionDeniedManager' => 'VuFind\Service\Factory::getPermissionDeniedManager',
             'VuFind\Search' => 'VuFind\Service\Factory::getSearchService',
             'VuFind\Search\BackendManager' => 'VuFind\Service\Factory::getSearchBackendManager',
+            'VuFind\Search\History' => 'VuFind\Service\Factory::getSearchHistory',
             'VuFind\Search\Memory' => 'VuFind\Service\Factory::getSearchMemory',
             'VuFind\SearchOptionsPluginManager' => 'VuFind\Service\Factory::getSearchOptionsPluginManager',
             'VuFind\SearchParamsPluginManager' => 'VuFind\Service\Factory::getSearchParamsPluginManager',
@@ -246,7 +249,7 @@ $config = [
             'VuFind\Session\Settings' => 'VuFind\Session\Settings',
         ],
         'initializers' => [
-            'VuFind\ServiceManager\Initializer::initInstance',
+            'VuFind\ServiceManager\ServiceInitializer',
         ],
         'aliases' => [
             'mvctranslator' => 'VuFind\Translator',
@@ -256,7 +259,7 @@ $config = [
     'translator' => [],
     'view_helpers' => [
         'initializers' => [
-            'VuFind\ServiceManager\Initializer::initZendPlugin',
+            'VuFind\ServiceManager\ZendPluginInitializer',
         ],
     ],
     'view_manager' => [
@@ -355,6 +358,8 @@ $config = [
                     'authornotes' => 'VuFind\Content\Factory::getAuthorNotes',
                     'excerpts' => 'VuFind\Content\Factory::getExcerpts',
                     'reviews' => 'VuFind\Content\Factory::getReviews',
+                    'summaries' => 'VuFind\Content\Factory::getSummaries',
+                    'toc' => 'VuFind\Content\Factory::getTOC',
                 ],
             ],
             'content_authornotes' => [
@@ -367,6 +372,18 @@ $config = [
                 'factories' => [
                     'syndetics' => 'VuFind\Content\Excerpts\Factory::getSyndetics',
                     'syndeticsplus' => 'VuFind\Content\Excerpts\Factory::getSyndeticsPlus',
+                ],
+            ],
+            'content_summaries' => [
+                'factories' => [
+                    'syndetics' => 'VuFind\Content\Summaries\Factory::getSyndetics',
+                    'syndeticsplus' => 'VuFind\Content\Summaries\Factory::getSyndeticsPlus',
+                ],
+            ],
+            'content_toc' => [
+                'factories' => [
+                    'syndetics' => 'VuFind\Content\TOC\Factory::getSyndetics',
+                    'syndeticsplus' => 'VuFind\Content\TOC\Factory::getSyndeticsPlus',
                 ],
             ],
             'content_covers' => [
@@ -573,13 +590,13 @@ $config = [
                     'preview' => 'VuFind\RecordTab\Factory::getPreview',
                     'reviews' => 'VuFind\RecordTab\Factory::getReviews',
                     'similaritemscarousel' => 'VuFind\RecordTab\Factory::getSimilarItemsCarousel',
+                    'toc' => 'VuFind\RecordTab\Factory::getTOC',
                     'usercomments' => 'VuFind\RecordTab\Factory::getUserComments',
                 ],
                 'invokables' => [
                     'description' => 'VuFind\RecordTab\Description',
                     'staffviewarray' => 'VuFind\RecordTab\StaffViewArray',
                     'staffviewmarc' => 'VuFind\RecordTab\StaffViewMARC',
-                    'toc' => 'VuFind\RecordTab\TOC',
                 ],
                 'initializers' => [
                     'ZfcRbac\Initializer\AuthorizationServiceInitializer'
@@ -848,7 +865,7 @@ $staticRoutes = [
     'MyResearch/Account', 'MyResearch/ChangePassword', 'MyResearch/CheckedOut',
     'MyResearch/Delete', 'MyResearch/DeleteList', 'MyResearch/Edit',
     'MyResearch/Email', 'MyResearch/Favorites', 'MyResearch/Fines',
-    'MyResearch/Holds', 'MyResearch/Home',
+    'MyResearch/HistoricLoans', 'MyResearch/Holds', 'MyResearch/Home',
     'MyResearch/ILLRequests', 'MyResearch/Logout',
     'MyResearch/NewPassword', 'MyResearch/Profile',
     'MyResearch/Recover', 'MyResearch/SaveSearch',
@@ -857,9 +874,10 @@ $staticRoutes = [
     'Primo/Advanced', 'Primo/Home', 'Primo/Search',
     'QRCode/Show', 'QRCode/Unavailable',
     'OAI/Server', 'Pazpar2/Home', 'Pazpar2/Search', 'Records/Home',
-    'Search/Advanced', 'Search/Email', 'Search/FacetList', 'Search/History',
-    'Search/Home', 'Search/NewItem', 'Search/OpenSearch', 'Search/Reserves',
-    'Search/ReservesFacetList', 'Search/Results', 'Search/Suggest',
+    'Search/Advanced', 'Search/CollectionFacetList', 'Search/Email',
+    'Search/FacetList', 'Search/History', 'Search/Home', 'Search/NewItem',
+    'Search/OpenSearch', 'Search/Reserves', 'Search/ReservesFacetList',
+    'Search/Results', 'Search/Suggest',
     'Summon/Advanced', 'Summon/FacetList', 'Summon/Home', 'Summon/Search',
     'Tag/Home',
     'Upgrade/Home', 'Upgrade/FixAnonymousTags', 'Upgrade/FixDuplicateTags',

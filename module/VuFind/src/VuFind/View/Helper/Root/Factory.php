@@ -26,6 +26,7 @@
  * @link     https://vufind.org/wiki/development Wiki
  */
 namespace VuFind\View\Helper\Root;
+
 use Zend\ServiceManager\ServiceManager;
 
 /**
@@ -91,7 +92,10 @@ class Factory
      */
     public static function getAuth(ServiceManager $sm)
     {
-        return new Auth($sm->getServiceLocator()->get('VuFind\AuthManager'));
+        return new Auth(
+            $sm->getServiceLocator()->get('VuFind\AuthManager'),
+            $sm->getServiceLocator()->get('VuFind\ILSAuthenticator')
+        );
     }
 
     /**
@@ -537,6 +541,20 @@ class Factory
             $sm->getServiceLocator()->get('VuFind\SearchResultsPluginManager'),
             $sm->get('url'), $sm->getServiceLocator()->get('VuFind\SearchTabsHelper')
         );
+    }
+
+    /**
+     * Construct the Summary helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Summaries
+     */
+    public static function getSummaries(ServiceManager $sm)
+    {
+        $loader = $sm->getServiceLocator()->get('VuFind\ContentPluginManager')
+            ->get('summaries');
+        return new ContentLoader($loader);
     }
 
     /**
