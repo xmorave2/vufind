@@ -35,7 +35,7 @@
               <a href="<?=$this->record($this->driver)->getLink('author', $this->highlight($summAuthor, null, true, false))?>"><?=$this->highlight($summAuthor)?></a><?=$i + 1 < $authorCount ? ',' : ''?>
             <? endforeach; ?>
           <? endif; ?>
-      <? $serie = $this->driver->getSerie();?>
+      <? $serie = $this->driver->tryMethod('getSerie');?>
       <? if (!empty($serie)): ?>
           <? foreach($serie as $s): ?>
             <br/><?=$this->transEsc('Serie')?>: <a href="<?=$this->record($this->driver)->getLink('series787', $s["title"])?>"><?=$s["title"]?></a><? echo ", " . $this->translate("part") . " " . $s["part"] ?>
