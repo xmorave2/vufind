@@ -305,7 +305,7 @@ class Factory
         $config = $sm->getServiceLocator()->get('VuFind\Config')->get('config');
         $config = isset($config->SearchHistoryLabels)
             ? $config->SearchHistoryLabels->toArray() : [];
-        return new HistoryLabel($config, $sm->get('transesc'));
+        return new HistoryLabel($config, $sm->get('transEsc'));
     }
 
     /**
@@ -329,7 +329,7 @@ class Factory
      */
     public static function getJsTranslations(ServiceManager $sm)
     {
-        return new JsTranslations($sm->get('transesc'));
+        return new JsTranslations($sm->get('transEsc'));
     }
 
     /**
@@ -444,6 +444,20 @@ class Factory
         return new Related(
             $sm->getServiceLocator()->get('VuFind\RelatedPluginManager')
         );
+    }
+
+    /**
+     * Construct the ResultFeed helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return ResultFeed
+     */
+    public static function getResultFeed(ServiceManager $sm)
+    {
+        $helper = new ResultFeed();
+        $helper->registerExtensions($sm);
+        return $helper;
     }
 
     /**

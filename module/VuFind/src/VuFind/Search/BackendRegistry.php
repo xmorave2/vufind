@@ -1,10 +1,11 @@
 <?php
+
 /**
- * VuFind Plugin Initializer
+ * Registry for search backends.
  *
  * PHP version 5
  *
- * Copyright (C) Villanova University 2010.
+ * Copyright (C) Villanova University 2017.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -20,39 +21,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * @category VuFind
- * @package  ServiceManager
+ * @package  Search
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org/wiki/development Wiki
+ * @link     https://vufind.org Main Site
  */
-namespace VuFind\ServiceManager;
-
-use Zend\ServiceManager\ServiceLocatorInterface;
+namespace VuFind\Search;
 
 /**
- * VuFind Plugin Initializer
+ * Registry for search backends.
  *
  * @category VuFind
- * @package  ServiceManager
+ * @package  Search
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     https://vufind.org/wiki/development Wiki
+ * @link     https://vufind.org Main Site
  */
-class VuFindPluginInitializer extends ZendPluginInitializer
+class BackendRegistry extends \VuFind\ServiceManager\AbstractPluginManager
 {
     /**
-     * Given an instance and a Plugin Manager, initialize the instance.
+     * Return the name of the base class or interface that plug-ins must conform
+     * to.
      *
-     * @param object                  $instance Instance to initialize
-     * @param ServiceLocatorInterface $manager  Plugin manager
-     *
-     * @return object
+     * @return string
      */
-    public function initialize($instance, ServiceLocatorInterface $manager)
+    protected function getExpectedInterface()
     {
-        if (method_exists($instance, 'setPluginManager')) {
-            $instance->setPluginManager($manager);
-        }
-        return parent::initialize($instance, $manager);
+        return 'VuFindSearch\Backend\BackendInterface';
     }
 }
