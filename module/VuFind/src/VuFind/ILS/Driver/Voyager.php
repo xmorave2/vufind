@@ -1271,16 +1271,16 @@ EOT;
             // For some reason barcode is not unique, so evaluate all resulting
             // rows just to be safe
             while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                $primary = !is_null($row['LOGIN'])
+                $primary = null !== $row['LOGIN']
                     ? mb_strtolower(utf8_encode($row['LOGIN']), 'UTF-8')
                     : null;
-                $fallback = $fallback_login_field && is_null($row['LOGIN'])
+                $fallback = $fallback_login_field && null === $row['LOGIN']
                     ? mb_strtolower(utf8_encode($row['FALLBACK_LOGIN']), 'UTF-8')
                     : null;
 
-                if ((!is_null($primary) && ($primary == $compareLogin
+                if ((null !== $primary && ($primary == $compareLogin
                     || $primary == $this->sanitizePIN($compareLogin)))
-                    || ($fallback_login_field && is_null($primary)
+                    || ($fallback_login_field && null === $primary
                     && $fallback == $compareLogin)
                 ) {
                     return [
@@ -1359,8 +1359,10 @@ EOT;
             "ITEM.ITEM_ID = ITEM_STATUS.ITEM_ID",
             "ITEM_STATUS.ITEM_STATUS = ITEM_STATUS_TYPE.ITEM_STATUS_TYPE",
             "ITEM.ITEM_ID = ITEM_BARCODE.ITEM_ID(+)",
+            "(ITEM_BARCODE.BARCODE_STATUS IS NULL OR " .
             "ITEM_BARCODE.BARCODE_STATUS IN (SELECT BARCODE_STATUS_TYPE FROM " .
-            "$this->dbName.ITEM_BARCODE_STATUS WHERE BARCODE_STATUS_DESC = 'Active')"
+            "$this->dbName.ITEM_BARCODE_STATUS " .
+            " WHERE BARCODE_STATUS_DESC = 'Active'))"
         ];
 
         // Order
