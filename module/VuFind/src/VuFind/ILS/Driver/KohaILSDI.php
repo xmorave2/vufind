@@ -829,7 +829,8 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 where datearrived IS NULL) as t USING (itemnumber)
             left join authorised_values as av
                 on i.$location_field = av.authorised_value
-            where i.biblionumber = :id AND av.category = :av_category
+            where i.biblionumber = :id AND (av.category = :av_category OR av.category IS NULL)
+            where i.biblionumber = :id AND (av.category = 'LOC' OR av.category IS NULL)
             order by i.itemnumber DESC";
         $sqlReserves = "select count(*) as RESERVESCOUNT from reserves "
             . "WHERE biblionumber = :id AND found IS NULL";
