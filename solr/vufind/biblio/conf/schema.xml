@@ -19,7 +19,8 @@
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
         <filter class="solr.ICUFoldingFilterFactory"/>
         <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
-        <filter class="solr.SnowballPorterFilterFactory" language="English"/>
+        <!--       <filter class="solr.SnowballPorterFilterFactory" language="English"/>-->
+        <filter class="solr.CzechStemFilterFactory"/>
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
       </analyzer>
       <analyzer type="query">
@@ -29,7 +30,8 @@
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
         <filter class="solr.ICUFoldingFilterFactory"/>
         <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
-        <filter class="solr.SnowballPorterFilterFactory" language="English"/>
+        <!-- <filter class="solr.SnowballPorterFilterFactory" language="English"/>-->
+        <filter class="solr.CzechStemFilterFactory"/>
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
       </analyzer>
     </fieldType>
@@ -219,6 +221,7 @@
    <!-- Local defined fields -->
    <field name="tematika" type="textFacet" indexed="true" stored="false" multiValued="true"/>
    <field name="availability" type="textFacet" indexed="true" stored="false" multiValued="true"/>
+   <field name="withdrawn_status" type="textFacet" indexed="true" stored="false" multiValued="true"/>
    <!-- Série - dílovky -->
    <field name="series787" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="series787_sort" type="integer" indexed="true" stored="true"/>
