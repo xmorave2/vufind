@@ -393,6 +393,7 @@ class ResultScroller extends AbstractPlugin
         if (!isset($this->data->firstId)) {
             $firstPage = $this->fetchPage($lastSearch, 1);
             $this->data->firstId = $firstPage[0];
+            //$this->data->firstId = isset($firstPage[0]) ? $firstPage[0] : 1;
         }
         return $this->data->firstId;
     }
