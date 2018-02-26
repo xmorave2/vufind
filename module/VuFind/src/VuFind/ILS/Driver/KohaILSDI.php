@@ -1951,6 +1951,28 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
     }
 
     /**
+     * getNumberOfIssues
+     *
+     * @param $biblio_id int The id (biblionumber) of record
+     *
+     * @return int number of issues
+     */
+
+    public function getNumberOfIssues($biblio_id)
+    {
+        if (!$this->db) {
+            $this->initDb();
+        }
+        $sql = "SELECT SUM(issues) AS issues_count FROM items "
+             . "WHERE biblionumber = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $biblio_id]);
+        $issues = $stmt->fetch();
+
+        return $issues['issues_count'];
+    }
+
+    /**
      * Convert a database date to a displayable date.
      *
      * @param string $date Date to convert
@@ -2015,4 +2037,6 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
         }
         return is_callable([$this, $method]);
     }
+
+
 }

@@ -60,6 +60,15 @@
           "renderType" => "RecordDriverTemplate",
           "template"   => "data-series787.phtml",
       ];
+      $specs["CheckoutsCount"] = [
+          "dataMethod"    => "getNumberOfCheckouts",
+          "pos"           => 1200,
+          "renderType"    => "Simple",
+          "suffix"        => "x",
+          "labelFunction" => function ($data) {
+              return "Number of checkouts";
+          },
+      ];
       $coreFields = $formatter->getData($driver, $specs);
     ?>
     <? if (!empty($coreFields)): ?>
