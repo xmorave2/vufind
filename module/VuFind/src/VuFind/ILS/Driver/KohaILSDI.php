@@ -49,6 +49,7 @@ use Zend\Log\LoggerInterface;
 class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
     \VuFindHttp\HttpServiceAwareInterface, \Zend\Log\LoggerAwareInterface
 {
+    use CacheTrait;
     use \VuFindHttp\HttpServiceAwareTrait;
     use \VuFind\Log\LoggerAwareTrait;
 
@@ -744,23 +745,23 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
         //TODO - test this new functionality
         /*
         if ( $level == "title" ) {
-        	$rsp2 = $this->makeIlsdiRequest("HoldTitle",
-        			array("patron_id" => $patron_id,
-        				  "bib_id" => $bib_id,
-        				  "request_location" => $request_location,
-        				  "pickup_location" => $pickup_location,
-        				  "pickup_expiry_date" => $needed_before_date,
-        				  "needed_before_date" => $needed_before_date
-        			));
+            $rsp2 = $this->makeIlsdiRequest("HoldTitle",
+                    array("patron_id" => $patron_id,
+                          "bib_id" => $bib_id,
+                          "request_location" => $request_location,
+                          "pickup_location" => $pickup_location,
+                          "pickup_expiry_date" => $needed_before_date,
+                          "needed_before_date" => $needed_before_date
+                    ));
         } else {
-        	$rsp2 = $this->makeIlsdiRequest("HoldItem",
-        			array("patron_id" => $patron_id,
-        				  "bib_id" => $bib_id,
-        				  "item_id" => $item_id,
-        				  "pickup_location" => $pickup_location,
-        				  "pickup_expiry_date" => $needed_before_date,
-        				  "needed_before_date" => $needed_before_date
-        			));
+            $rsp2 = $this->makeIlsdiRequest("HoldItem",
+                    array("patron_id" => $patron_id,
+                          "bib_id" => $bib_id,
+                          "item_id" => $item_id,
+                          "pickup_location" => $pickup_location,
+                          "pickup_expiry_date" => $needed_before_date,
+                          "needed_before_date" => $needed_before_date
+                    ));
         }
         */
         $this->debug("Title: " . $rsp->{'title'});
@@ -932,9 +933,8 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 $status = 'Lost/Missing';
             }
 
-            $duedate_formatted = date_format(new \DateTime($duedate), "j. n. Y");
-
             $branch = '';
+            $duedate_formatted = $this->displayDate($duedate);
 
             //Retrieving the full branch name
             if ($rowItem['HLDBRNCH'] == null) {
@@ -1119,9 +1119,11 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
             $sql = "SELECT al.amount*100 as amount, " .
                    "al.amountoutstanding*100 as balance, al.accounttype as fine, " .
                    "al.date as createdat, items.biblionumber as id, " .
-                   "al.description as title " .
+                   "al.description as title, issues.date_due as duedate, " .
+                   "issues.issuedate as issuedate " .
                    "FROM `accountlines` al " .
                    "LEFT JOIN items USING (itemnumber) " .
+                   "LEFT JOIN issues USING (issue_id) " .
                    "WHERE al.borrowernumber = :id ";
             if (!$this->db) {
                 $this->initDB();
@@ -1193,17 +1195,14 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 }
 
                 $transactionLst[] = [
-                           'amount'     => $row['amount'],
-                           'checkout'   => "N/A",
-                           'title'      => $row['title'],
-                           'fine'       => $fineValue,
-                           'balance'    => $row['balance'],
-                           'createdate' => $row['createdat'],
-                           'duedate' => date_format(
-                               new \DateTime($row['duedate']), "j. n. Y"
-                           ),
-                           'duedate'    => "N/A",
-                           'id'         => isset($row['id']) ? $row['id'] : -1,
+                    'amount'     => $row['amount'],
+                    'checkout'   => $this->displayDateTime($row['issuedate']),
+                    'title'      => $row['title'],
+                    'fine'       => $fineValue,
+                    'balance'    => $row['balance'],
+                    'createdate' => $this->displayDate($row['createdat']),
+                    'duedate'    => $this->displayDate($row['duedate']),
+                    'id'         => isset($row['id']) ? $row['id'] : -1,
                 ];
             }
             return $transactionLst;
@@ -1242,7 +1241,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 'checkout'   => "N/A",
                 'fine'       => $this->getField($fine->{'description'}),
                 'balance'    => 100 * $this->getField($fine->{'amountoutstanding'}),
-                'createdate' => $this->getField($fine->{'date'}),
+                'createdate' => $this->displayDate($this->getField($fine->{'date'})),
                 // FIXME: require accountlines.itemnumber -> issues.date_due data.
                 'duedate'    => "N/A",
                 // FIXME: require accountlines.itemnumber -> items.biblionumber data
@@ -1278,10 +1277,13 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
             $holdLst[] = [
                 'id'       => $this->getField($hold->{'biblionumber'}),
                 'location' => $this->getField($hold->{'branchname'}),
-                // FIXME: require exposure of reserves.expirationdate
-                'expire'   => "N/A",
-                'create'   => date_format(
-                    new \DateTime($this->getField($hold->{'reservedate'})), "j. n. Y"
+                'expire'   => isset($hold->{'expirationdate'})
+                    ? $this->displayDate(
+                        $this->getField($hold->{'expirationdate'})
+                    )
+                    : "N/A",
+                'create'   => $this->displayDate(
+                    $this->getField($hold->{'reservedate'})
                 ),
                 'position' => $this->getField($hold->{'priority'}),
                 'title' => $this->getField($hold->{'title'}),
@@ -1556,11 +1558,8 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
             }
 
             $transactionLst[] = [
-                'duedate'   => date_format(
-                    new \DateTime(
-                        $this->getField($loan->{'date_due'})
-                    ),
-                    "j. n. Y"
+                'duedate'   => $this->displayDate(
+                    $this->getField($loan->{'date_due'})
                 ),
                 'id'        => $this->getField($loan->{'biblionumber'}),
                 'item_id'   => $this->getField($loan->{'itemnumber'}),
@@ -1619,7 +1618,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                     = explode(" ", $this->getField($rsp->{'date_due'}));
                 $retVal['details'][$renewItem] = [
                     "success"  => true,
-                    "new_date" => date_format(new \DateTime($date), "j. n. Y"),
+                    "new_date" => $this->displayDate($date),
                     "new_time" => $time,
                     "item_id"  => $renewItem,
                 ];
@@ -1992,6 +1991,9 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
         } elseif (preg_match("/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/", $date) === 1) {
             // YYYY-MM-DD HH:MM:SS
             return $this->dateConverter->convertToDisplayDate('Y-m-d H:i:s', $date);
+        } elseif (preg_match("/^\d{4}-\d\d-\d\d \d\d:\d\d$/", $date) === 1) {
+            // YYYY-MM-DD HH:MM
+            return $this->dateConverter->convertToDisplayDate('Y-m-d H:i', $date);
         } elseif (preg_match("/^\d{4}-\d{2}-\d{2}$/", $date) === 1) { // YYYY-MM-DD
             return $this->dateConverter->convertToDisplayDate('Y-m-d', $date);
         } else {
@@ -2016,6 +2018,12 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
             return
                 $this->dateConverter->convertToDisplayDateAndTime(
                     'Y-m-d H:i:s', $date
+                );
+        } elseif (preg_match("/^\d{4}-\d\d-\d\d \d\d:\d\d$/", $date) === 1) {
+            // YYYY-MM-DD HH:MM
+            return
+                $this->dateConverter->convertToDisplayDateAndTime(
+                    'Y-m-d H:i', $date
                 );
         } else {
             error_log("Unexpected date format: $date");
