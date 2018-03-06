@@ -876,6 +876,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
             $sqlStmtWaitingReserve->execute([':item_id' => $inum]);
             $waitingReserveRow = $sqlStmtWaitingReserve->fetch();
             $waitingReserve = $waitingReserveRow["WAITING"];
+            $holdable = 1;
             if ($rowItem['location'] == 'PROC') {
                 $available = false;
                 $status = 'In processing';
@@ -908,6 +909,9 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                     $duedate = '';
                     break;
                 }
+            }
+            if ($rowItem['location'] == 'ST') {
+                $holdable = 0;
             }
             /*
              * If the Item is in any of locations defined by
@@ -968,7 +972,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 $branchSqlStmt->execute([':branch' => $rowItem["TRANSFERTO"]]);
                 $rowTo = $branchSqlStmt->fetch();
                 $transferto = $rowTo ? $rowTo["BNAME"] : $rowItem["TRANSFERTO"];
-                $status = "Na cest? z $transferfrom do $transferto";
+                $status = "Na cestě z $transferfrom do $transferto";
                 $available = false;
                 $onTransfer = true;
             }
@@ -1008,6 +1012,8 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                     : $rowItem['COPYNO'],
                 'requests_placed' => $reservesCount ? $reservesCount : 0,
                 'frameworkcode' => $rowItem['DOCTYPE'],
+                'is_holdable' => $holdable,
+                'addLink' => $holdable,
             ];
         }
 
