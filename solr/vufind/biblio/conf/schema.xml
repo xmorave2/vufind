@@ -3,7 +3,11 @@
   <types>
     <!-- Define fieldType long as it is needed by the _version_ field required by Solr 4.x -->
     <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
-    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true" />
+    <!--        <analyzer>
+            <filter class="solr.ICUCollationKeyFilterFactory" locale="cs" strength="secondary"/>
+        </analyzer>
+    <fieldType>-->
     <fieldType name="integer" class="solr.TrieIntField" precisionStep="0"/>
     <fieldType name="textFacet" class="solr.TextField" sortMissingLast="true" omitNorms="true">
       <analyzer>
@@ -225,6 +229,9 @@
    <!-- Série - dílovky -->
    <field name="series787" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="series787_sort" type="integer" indexed="true" stored="true"/>
+   <!-- Zakony pro lidi -->
+   <field name="law_doctype" type="string" indexed="true" stored="true" multiValued="true"/>
+
    <!-- Dynamic fields for customization without schema modification -->
    <dynamicField name="*_date" type="date" indexed="true" stored="true"/>
    <dynamicField name="*_date_mv" type="date" indexed="true" stored="true" multiValued="true"/>
