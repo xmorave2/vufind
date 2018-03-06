@@ -5,7 +5,7 @@
     $cover = $coverDetails['html'];
     $preview = $this->record($this->driver)->getPreviews();
   ?>
-  <? if ($QRCode || $cover || $preview): ?>
+  <? if ($QRCode || $cover || $preview ): ?>
     <div class="media-left <?=$this->escapeHtmlAttr($coverDetails['size'])?> img-col">
       <? /* Display thumbnail if appropriate: */ ?>
       <? if($cover): ?>
@@ -28,8 +28,13 @@
           <?=$preview?>
         </div>
       <? endif; ?>
+
+      <?=$this->render('RecordDriver/SolrDefault/mkp-ebooks.phtml'); ?>
+
     </div>
   <? endif; ?>
+
+
   <div class="media-body">
 
     <h3 property="name"><?=$this->escapeHtml(str_replace(['[',']'], '', $this->driver->getShortTitle() . ' ' . $this->driver->getSubtitle() . ' ' . $this->driver->getTitleSection()))?></h3>

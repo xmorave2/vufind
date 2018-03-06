@@ -1,0 +1,43 @@
+<? // E-books from Municipal library Prague 
+    $icons = array(
+        "epub" => "file-o",
+        "html" => "file-code-o",
+        "pdb" => "file-o",
+        "pdf" => "file-pdf-o",
+        "prc" => "file-archive-o",
+        "rtf" => "file-text-o",
+        "txt" => "file-o",
+    );
+
+    $formatTexts = array(
+        "epub" => "EPUB (univerzální formát pro čtečky e-knih) ",
+        "html" => "HTML (webová stránka)",
+        "pdb" => "PDB (Palm)",
+        "pdf" => "PDF",
+        "prc" => "PRC (Kindle)",
+        "rtf" => "RTF",
+        "txt" => "TXT",
+    );
+    $urls = $this->driver->getURLs();
+    $ebookUrls = [];
+    foreach ($urls as $url) {
+        $ext = preg_replace('/.*\.([a-z]*)$/', '$1', $url['url']);
+        if( isset($formatTexts[$ext]) ) {
+            $ebookUrls[] = [
+                'description' => $formatTexts[$ext],
+                'url'         => $url['url'],
+                'icon'        => $icons[$ext],
+            ];
+        }
+    }
+?>
+<? if (!empty($ebookUrls)): ?>
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?=$this->translate("Download for free")?> <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+            <? foreach($ebookUrls as $url): ?>
+                <li><a target="_blank" href="<?=$url['url']?>"><i class="fa fa-<?=$url['icon']?>"></i> <?=$url['description']?></a></li>
+            <? endforeach; ?>
+        </ul>
+    </div>
+<? endif; ?>

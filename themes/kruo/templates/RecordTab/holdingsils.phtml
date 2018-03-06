@@ -25,7 +25,17 @@
   </div>
 <? endif; ?>
 
+<?
+    $locations = array_keys($holdings['holdings']);
+    $location = $locations[0];
+    $studovna = (count($locations) == 1) && (strpos($location, "Studovna") != false);
+    //   var_dump(strpos($location, "Studovna") !== false);
+    //   var_dump(count($locations));
+ //  var_dump($studovna)
+?>
+
 <?=($offlineMode == "ils-offline") ? $this->render('Helpers/ils-offline.phtml', ['offlineModeMsg' => 'ils_offline_holdings_message']) : ''?>
+<? if (!$studovna): ?>
 <? if (($this->ils()->getHoldsMode() == 'driver' && !empty($holdings['holdings'])) || $this->ils()->getTitleHoldsMode() == 'driver'): ?>
   <? if ($account->loginEnabled() && $offlineMode != 'ils-offline'): ?>
     <? if (!$user): ?>
@@ -39,9 +49,12 @@
     <? endif; ?>
   <? endif; ?>
 <? endif; ?>
+
 <? $holdingTitleHold = $this->driver->tryMethod('getRealTimeTitleHold'); if (!empty($holdingTitleHold)): ?>
   <a class="placehold btn btn-primary" data-lightbox title="<?=$this->transEsc('request_place_text')?>" href="<?=$this->recordLink()->getRequestUrl($holdingTitleHold)?>"><i class="fa fa-flag" aria-hidden="true"></i>&nbsp;<?=$this->transEsc('title_hold_place')?></a>
 <? endif; ?>
+<? endif; //studovna ?>
+
 <? if (!empty($urls) || $openUrlActive): ?>
   <h3><?=$this->transEsc("Internet")?></h3>
   <? if (!empty($urls)): ?>
