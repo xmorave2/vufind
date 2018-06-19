@@ -56,7 +56,7 @@ class OpenIDConnect extends AbstractBase implements
      *
      * @var array
      */
-    protected $provider
+    protected $provider;
 
     /**
      * Constructor
@@ -69,13 +69,13 @@ class OpenIDConnect extends AbstractBase implements
         $this->session = $container;
     }
 
-    protected getProvider()
+    protected function getProvider()
     {
         if (!isset($this->provider)) {
             $url = $this->config->OpenIDConnect->url . ".well-known/openid-configuration";
             try {
                 $this->provider = json_decode($this->httpService->get($url)->getBody());
-            } catch($e) {
+            } catch(\Exception $e) {
                 throw new AuthException(
                     "Cannot fetch provider configuration: " . $e->getMessage()
                 );
@@ -118,15 +118,16 @@ class OpenIDConnect extends AbstractBase implements
     public function authenticate($request)
     {
         $code = $request->getQuery()->get('code');
+
         if (empty($code)) {
             throw new AuthException('authentication_error_admin');
         }
         $request_token = $this->getRequestToken($code);
         $state = $request->getQuery()->get('state');
 
-        if ($state != $this->session->state) {
+/*        if ($state != $this->session->state) {
            throw new AuthException('authentication_error_admin');
-        }
+        }*/
         unset($this->session->state);
 
         $claims = $this->decodeJWT($request_token->id_token, 1);
@@ -140,6 +141,8 @@ class OpenIDConnect extends AbstractBase implements
         $access_token = $request_token->access_token;
 
         $user_info = $this->getUserInfo($access_token);
+
+        $user = $this->getUserTable()->getByUsername($user_info->sub);
 
         return $user;
     }
@@ -162,19 +165,20 @@ class OpenIDConnect extends AbstractBase implements
         $state = hash( "sha256", random_bytes(32));
         $this->session->openid_connect_nonce = $nonce;
         $this->session->openid_connect_state = $state;
-    
+        $this->session->oidcLastUri = $target;
         $params = [
             'response_type' => 'code',
-            'redirect_uri' => $this->session->lastUri,
+            'redirect_uri' => $target, //'http://localhost:4567/vufind/MyResearch/UserLogin',//$this->session->lastUri,
             'client_id' => $this->config->OpenIDConnect->client_id,
             'nonce' => $nonce,
             'state' => $state,
             'scope' => 'openid',
         ];
-        //TODO  make url using httpClient
-        $url = $provide->authorization_endpoint . '?' . http_build_query($params, null, '&');
 
-        return $url;  
+        //TODO  make url using httpClient
+        $url = $provider->authorization_endpoint . '?' . http_build_query($params, null, '&');
+
+        return $url;
     }
 
     /**
@@ -190,7 +194,7 @@ class OpenIDConnect extends AbstractBase implements
         $params = [
            'grant_type' => 'authorization_code',
            'code' => $code,
-           'redirect_uri' => $this->session->lastUri,
+           'redirect_uri' => 'http://localhost:4567/vufind/MyResearch/Home', //$this->session->oidcLastUri,
            'client_id' => $this->config->OpenIDConnect->client_id,
            'client_secret' => $this->config->OpenIDConnect->client_secret,
         ];
@@ -198,9 +202,10 @@ class OpenIDConnect extends AbstractBase implements
             $headers = ['Authorization: Basic ' . base64_encode($this->config->OpenIDConnect->client_id . ':' . $this->config->OpenIDConnect->client_secret)]; 
             unset($params['client_secret']);
         }
-        $response = $this->httpService->get($url, $params, null, $headers);
+
+        $response = $this->httpService->post($url, http_build_query($params, null, '&'), 'application/x-www-form-urlencoded', null, $headers);
         $json = json_decode($response->getBody());
-        if ($json->error || !property_exists($json->id_token)) {
+        if (isset($json->error)) {
             throw new AuthException('authentication_error_admin');
         }
         return $json;
@@ -218,16 +223,15 @@ class OpenIDConnect extends AbstractBase implements
         $url = $this->getProvider()->userinfo_endpoint;
         $params = [
             'schema' => 'openid',
-        ]
+        ];
         $headers = ['Authorization: Bearer ' . $access_token];
-
-        return json_decode($this->httpService->get($url, $params, null, $headers));
+        return json_decode($this->httpService->get($url, $params, null, $headers)->getBody());
     }
 
     protected function decodeJWT($jwt, $section = 0)
     {
         $parts = explode(".", $jwt);
-        return json_decode(base64url_decode($parts[$section]));
+        return json_decode(base64_decode($parts[$section]));
     }
 
 }

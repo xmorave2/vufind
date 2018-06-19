@@ -181,4 +181,19 @@ class Factory
             $sm->getServiceLocator()->get('VuFind\SessionManager')
         );
     }
+
+    /**
+     * Construct the OpenID Connect plugin.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return OpenIDConnect
+     */
+    public static function getOpenIDConnect(ServiceManager $sm)
+    {
+        $container = new \Zend\Session\Container(
+            'OpenIDConnect', $sm->getServiceLocator()->get('VuFind\SessionManager')
+        );
+        return new OpenIDConnect($container);
+    }
 }
