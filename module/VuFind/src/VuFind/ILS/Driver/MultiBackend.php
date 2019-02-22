@@ -1217,6 +1217,27 @@ class MultiBackend extends AbstractBase implements \Zend\Log\LoggerAwareInterfac
     }
 
     /**
+     * getNumberOfIssues
+     *
+     * @param $detail array 
+     *  - key 'id' int The id (biblionumber) of record
+     * @return int number of issues
+     */
+
+    public function getNumberOfIssues($detail) {
+        $source = $this->getSource($detail['id']);
+        $driver = $this->getDriver($source);
+        if ($driver 
+            && $this->methodSupported($driver, 'getNumberOfIssues', compact('details'))
+        ) {
+            return $driver->getNumberOfIssues(
+                $this->stripIdPrefixes($detail, $source)
+            );
+        }
+        throw new ILSException('No suitable backend driver found');
+    }
+
+    /**
      * Check whether the patron is blocked from placing requests (holds/ILL/SRR).
      *
      * @param array $patron Patron data from patronLogin().
