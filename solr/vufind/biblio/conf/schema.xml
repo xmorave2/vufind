@@ -225,6 +225,8 @@
    <!-- Local defined fields -->
    <field name="tematika" type="textFacet" indexed="true" stored="false" multiValued="true"/>
    <field name="availability" type="textFacet" indexed="true" stored="false" multiValued="true"/>
+   <field name="itemtype" type="textFacet" indexed="true" stored="false" multiValued="true"/>
+   <field name="sublocation" type="textFacet" indexed="true" stored="false" multiValued="true"/>
    <field name="withdrawn_status" type="textFacet" indexed="true" stored="false" multiValued="true"/>
    <!-- Série - dílovky -->
    <field name="series787" type="text" indexed="true" stored="true" multiValued="true"/>
