@@ -47,9 +47,8 @@ class ObalkyKnih extends \VuFind\Content\AbstractCover
      */
     public function __construct($config)
     {
-        $this->supportsIsbn = true;
-        $this->supportsIssn = true;
-        $this->supportsOclc = true;
+        $this->supportsIsbn = $this->supportsIssn =
+            $this->supportsOclc = $this->supportsUpc = true;
         $this->cacheAllowed = true;
 
         $this->apiUrl = isset($config->url) ? 
@@ -96,6 +95,10 @@ class ObalkyKnih extends \VuFind\Content\AbstractCover
 
         if (isset($ids['oclc'])) {
              $query['oclc'] = $ids['oclc'];
+        }
+
+        if (isset($ids['upc'])) {
+             $query['ean'] = $ids['upc'];
         }
 
         $url = $this->apiUrl ."?" . $param . "=" . json_encode([$query]);
