@@ -822,7 +822,8 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
             i.itemnotes as PUBLICNOTES, b.frameworkcode as DOCTYPE,
             t.frombranch as TRANSFERFROM, t.tobranch as TRANSFERTO,
             i.itemlost as ITEMLOST, i.itemlost_on AS LOSTON,
-            i.stocknumber as STOCKNUMBER, i.enumchron AS PERIONAME
+            i.stocknumber as STOCKNUMBER, i.enumchron AS PERIONAME,
+            UPPER(LEFT(CONCAT_WS('',b.author, b.title),4)) as pseudocallnumber
             from items i join biblio b on i.biblionumber = b.biblionumber
             left outer join
                 (SELECT itemnumber, frombranch, tobranch from branchtransfers
@@ -830,6 +831,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
             left join authorised_values as av
                 on i.$location_field = av.authorised_value
             where i.biblionumber = :id AND (av.category = :av_category OR av.category IS NULL)
+                AND i.withdrawn = '0'
             order by i.itemnumber DESC";
         $sqlReserves = "select count(*) as RESERVESCOUNT from reserves "
             . "WHERE biblionumber = :id AND found IS NULL";
@@ -949,6 +951,9 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 $branch = $rowItem['HLDBRNCH'];
             }
 
+            $sublocation = $rowItem['LOCATION'];
+            $branchname = null;
+
             if ($loc != "Unknown") {
                 $sqlBranch = "select branchname as BNAME
                               from branches
@@ -957,6 +962,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 $branchSqlStmt->execute([':branch' => $branch]);
                 $row = $branchSqlStmt->fetch();
                 if ($row) {
+                    $branchname = $row['BNAME'];
                     $loc = $row['BNAME'] ." - " . $loc;
                 }
             }
@@ -993,7 +999,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 'item_id'      => $rowItem['ITEMNO'],
                 'status'       => $status,
                 'location'     => $loc,
-                'item_notes'  => (null == $rowItem['PUBLICNOTES']
+                'item_notes'  => (null === $rowItem['PUBLICNOTES']
                     ? null : [ $rowItem['PUBLICNOTES'] ]),
                 'notes'        => $notes["MFHD"],
                 //'reserve'      => (null == $rowItem['RESERVES'])
@@ -1014,6 +1020,9 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 'frameworkcode' => $rowItem['DOCTYPE'],
                 'is_holdable' => $holdable,
                 'addLink' => $holdable,
+                'branchname' => $branchname,
+                'sublocation' => $sublocation,
+                'pseudocallnumber' => $rowItem['pseudocallnumber'],
             ];
         }
 
@@ -1999,16 +2008,34 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
     /**
      * getNumberOfIssues
      *
-     * @param $biblio_id int The id (biblionumber) of record
+     * @param $detail array
+     *   - key 'id' int The id (biblionumber) of record 
      *
      * @return int number of issues
      */
 
-    public function getNumberOfIssues($biblio_id)
+    public function getNumberOfIssues($detail)
     {
         if (!$this->db) {
             $this->initDb();
         }
+        $sql1 = "SELECT COUNT(*) AS issues_count
+                 FROM old_issues oi
+                 JOIN items i ON oi.itemnumber = i.itemnumber
+                 WHERE i.biblionumber = :id";
+        $sql2 = "SELECT COUNT(*) AS issues_count
+                 FROM issues oi
+                 JOIN items i ON oi.itemnumber = i.itemnumber
+                 WHERE i.biblionumber = :id";
+
+        $stmt1 = $this->db->prepare($sql1);
+        $stmt2 = $this->db->prepare($sql2);
+        $stmt1->execute([':id' => $detail['id']]);
+        $stmt2->execute([':id' => $detail['id']]);
+        $issues1 = $stmt1->fetch();
+        $issues2 = $stmt2->fetch();
+        return $issues1['issues_count'] + $issues2['issues_count'];
+
         $sql = "SELECT SUM(issues) AS issues_count FROM items "
              . "WHERE biblionumber = :id";
         $stmt = $this->db->prepare($sql);
