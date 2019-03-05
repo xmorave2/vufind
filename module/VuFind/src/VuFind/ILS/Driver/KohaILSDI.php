@@ -132,6 +132,13 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
     protected $showPermanentLocation;
 
     /**
+     * An array with itemtypes which should be shown in new items search, if empty, it shows all
+     *
+     * @var array
+     */
+    protected $newsItemtypes;
+
+    /**
      * Constructor
      *
      * @param \VuFind\Date\Converter $dateConverter Date converter object
@@ -194,7 +201,11 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
 
         $this->showPermanentLocation
             = isset($this->config['Catalog']['showPermanentLocation'])
-            ? $this->config['Catalog']['showPermanentLocation'] : false;
+	    ? $this->config['Catalog']['showPermanentLocation'] : false;
+
+	$this->newsItemtypes
+            = isset($this->config['Catalog']['newsItemtypes'])
+            ? $this->config['Catalog']['newsItemtypes'] : [];
 
         $this->debug("Config Summary:");
         $this->debug("DB Host: " . $this->host);
@@ -1052,8 +1063,13 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                 FROM items
                 WHERE itemlost = 0
                    and dateaccessioned > DATE_ADD(CURRENT_TIMESTAMP,
-                      INTERVAL -$daysOld day)
-                ORDER BY dateaccessioned DESC";
+		      INTERVAL -$daysOld day)";
+
+	if(!empty($this->newsItemtypes)) {
+            $itypes = implode("','", $this->newsItemtypes);
+	    $sql .= " AND itype IN ('$itypes')";
+        }
+        $sql .= " ORDER BY dateaccessioned DESC";
 
         if (!$this->db) {
             $this->initDb();
