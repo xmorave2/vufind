@@ -1,0 +1,16 @@
+header .navbar-brand, header .navbar-brand:active, header .navbar-brand:hover, header .navbar-brand:focus {
+    color: #fff;
+}
+
+.banner .navbar-brand {
+    width:auto;
+}
+
+.navbar-header h2 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.navbar-brand-custom {
+    margin-left: 15px;
+}
