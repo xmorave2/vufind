@@ -46,16 +46,19 @@ class Redis extends AbstractBase
     /**
      * Redis connection
      *
-     * @var \Credis_Client
+     * @var \VuFind\Service\Redis
      */
-    protected $connection = false;
+    protected $service = null;
 
     /**
-     * Redis version
+     * Redis constructor.
      *
-     * @var int
+     * @param \VuFind\Service\Redis $redisService
      */
-    protected $redisVersion = 3;
+    public function __construct(\VuFind\Service\Redis $redisService)
+    {
+        $this->service = $redisService;
+    }
 
     /**
      * Get connection to Redis
@@ -65,25 +68,7 @@ class Redis extends AbstractBase
      */
     protected function getConnection()
     {
-        if (!$this->connection) {
-            // Set defaults if nothing set in config file.
-            $host = $this->config->redis_host ?? 'localhost';
-            $port = $this->config->redis_port ?? 6379;
-            $timeout = $this->config->redis_connection_timeout ?? 0.5;
-            $auth = $this->config->redis_auth ?? false;
-            $redis_db = $this->config->redis_db ?? 0;
-            $this->redisVersion = (int)($this->config->redis_version ?? 3);
-            $standalone = (bool)($this->config->redis_standalone ?? true);
-
-            // Create Credis client, the connection is established lazily
-            $this->connection = new \Credis_Client(
-                $host, $port, $timeout, '', $redis_db, $auth
-            );
-            if ($standalone) {
-                $this->connection->forceStandalone();
-            }
-        }
-        return $this->connection;
+        return $this->service->getConnection();
     }
 
     /**
@@ -129,7 +114,7 @@ class Redis extends AbstractBase
         parent::destroy($sess_id);
 
         // Perform Redis-specific cleanup
-        if ($this->redisVersion >= 4) {
+        if ($this->service->getVersion() >= 4) {
             $return = $this->getConnection()->unlink("vufind_sessions/{$sess_id}");
         } else {
             $return = $this->getConnection()->del("vufind_sessions/{$sess_id}");

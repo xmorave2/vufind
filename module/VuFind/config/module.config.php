@@ -414,6 +414,7 @@ $config = [
             'VuFind\Search\SearchRunner' => 'VuFind\Search\SearchRunnerFactory',
             'VuFind\Search\SearchTabsHelper' => 'VuFind\Search\SearchTabsHelperFactory',
             'VuFind\Service\ReCaptcha' => 'VuFind\Service\ReCaptchaFactory',
+            'VuFind\Service\Redis' => 'VuFind\Service\RedisFactory',
             'VuFind\Session\PluginManager' => 'VuFind\ServiceManager\AbstractPluginManagerFactory',
             'VuFind\Session\Settings' => 'Zend\ServiceManager\Factory\InvokableFactory',
             'VuFind\SMS\SMSInterface' => 'VuFind\SMS\Factory',
