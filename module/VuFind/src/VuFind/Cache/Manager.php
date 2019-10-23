@@ -55,6 +55,13 @@ class Manager
     protected $defaults;
 
     /**
+     * Redis adapter config settings.
+     *
+     * @var array
+     */
+    protected $redisConfig;
+
+    /**
      * Was there a problem building cache directories?
      *
      * @var bool
@@ -90,6 +97,7 @@ class Manager
         // for future cache-specific overrides.
         $cacheConfig = isset($config->Cache) ? $config->Cache : false;
         $this->defaults = $cacheConfig ? $cacheConfig->toArray() : false;
+        $this->redisConfig = $config->Redis ?? [];
 
         // Get base cache directory.
         $cacheBase = $this->getCacheDir();
@@ -302,6 +310,21 @@ class Manager
     {
         $this->cacheSettings[$cacheName] = [
             'adapter' => 'APC',
+            'plugins' => ['serializer']
+        ];
+    }
+
+    /**
+     * Add an Redis cache to the manager.
+     *
+     * @param string $cacheName Name of new cache to create
+     *
+     * @return void
+     */
+    protected function createRedisCache($cacheName)
+    {
+        $this->cacheSettings[$cacheName] = [
+            'adapter' => '\VuFind\Cache\Storage\Adapter\Redis',
             'plugins' => ['serializer']
         ];
     }

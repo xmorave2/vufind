@@ -106,8 +106,8 @@ class Redis
     /**
      * Get connection to Redis
      *
-     * @throws \Exception
      * @return \Credis_Client
+     * @throws \CredisException
      */
     public function getConnection()
     {
