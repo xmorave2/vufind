@@ -132,6 +132,13 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
     protected $showPermanentLocation;
 
     /**
+     * Should we show homebranchinstead of holdingbranch
+     *
+     * @var boolean
+     */
+    protected $showHomebranch;
+
+    /**
      * Constructor
      *
      * @param \VuFind\Date\Converter $dateConverter Date converter object
@@ -195,6 +202,8 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
         $this->showPermanentLocation
             = isset($this->config['Catalog']['showPermanentLocation'])
             ? $this->config['Catalog']['showPermanentLocation'] : false;
+
+        $this->showHomebranch = $this->config['Catalog']['showHomebranch'] ?? false;
 
         $this->debug("Config Summary:");
         $this->debug("DB Host: " . $this->host);
@@ -939,7 +948,7 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
             $branch = '';
 
             //Retrieving the full branch name
-            if ($rowItem['HLDBRNCH'] == null) {
+            if($this->showHomebranch) {
                 if ($rowItem['HOMEBRANCH'] == null) {
                     $loc = "Unknown";
                 } else {
@@ -947,8 +956,17 @@ class KohaILSDI extends \VuFind\ILS\Driver\AbstractBase implements
                     $branch = $rowItem['HOMEBRANCH'];
                 }
             } else {
-                $loc = $rowItem['LOCATION'];
-                $branch = $rowItem['HLDBRNCH'];
+                if ($rowItem['HLDBRNCH'] == null) {
+                    if ($rowItem['HOMEBRANCH'] == null) {
+                        $loc = "Unknown";
+                    } else {
+                        $loc = $rowItem['LOCATION'];
+                        $branch = $rowItem['HOMEBRANCH'];
+                    }
+                } else {
+                    $loc = $rowItem['LOCATION'];
+                    $branch = $rowItem['HLDBRNCH'];
+                }
             }
 
             $sublocation = $rowItem['LOCATION'];
