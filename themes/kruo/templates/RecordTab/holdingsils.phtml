@@ -27,11 +27,12 @@
 
 <?
     $locations = array_keys($holdings['holdings']);
-    $location = $locations[0];
-    $studovna = (count($locations) == 1) && (strpos($location, "Studovna") != false);
-    //   var_dump(strpos($location, "Studovna") !== false);
-    //   var_dump(count($locations));
- //  var_dump($studovna)
+    if (count($locations) >= 1) {
+        $location = $locations[0];
+        $studovna = (count($locations) == 1) && (strpos($location, "Studovna") != false);
+    } else {
+        $studovna = 1;
+    }
 ?>
 
 <?=($offlineMode == "ils-offline") ? $this->render('Helpers/ils-offline.phtml', ['offlineModeMsg' => 'ils_offline_holdings_message']) : ''?>
