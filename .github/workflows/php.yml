@@ -1,4 +1,4 @@
-name: PHP Composer
+name: VuFind CI
 
 on:
   push:
@@ -34,8 +34,6 @@ jobs:
     - name: Install dependencies
       if: steps.composer-cache.outputs.cache-hit != 'true'
       run: composer install --prefer-dist --no-progress --no-suggest
-      with:
-        composer_version: 1
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
