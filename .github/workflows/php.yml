@@ -30,10 +30,12 @@ jobs:
       uses: php-actions/composer@v4
       with: 
         composer_version: 1
+        
+    - name: Install modules
+      run: yarn
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run ci
-      uses: stefanoeb/eslint-action@1.0.2
       run: vendor/bin/phing eslint jshint phpunitfast phpcs-console php-cs-fixer-dryrun checkLessToSass
