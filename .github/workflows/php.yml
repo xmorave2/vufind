@@ -10,7 +10,10 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        php-versions: ['7.2', '7.3', '7.4', '8.0']
+    name: PHP ${{ matrix.php-versions }}
     steps:
     - uses: actions/checkout@v2
 
@@ -33,5 +36,5 @@ jobs:
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
-    # - name: Run test suite
-    #   run: composer run-script test
+    - name: Run ci
+      run: vendor/bin/phing eslint jshint phpunitfast phpcs-console php-cs-fixer-dryrun checkLessToSass
