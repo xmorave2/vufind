@@ -16,7 +16,15 @@ jobs:
     name: PHP ${{ matrix.php-versions }}
     steps:
     - uses: actions/checkout@v2
+    
+    - uses: actions/setup-node@v2-beta
 
+    - name: Install eslint
+      run: npm install -g eslint@"<5.0.0"
+      
+    - name: Install jshint
+      run: npm install -g jshint@"2.9.6"
+      
     - name: Cache Composer packages
       id: composer-cache
       uses: actions/cache@v2
@@ -30,9 +38,6 @@ jobs:
       uses: php-actions/composer@v4
       with: 
         composer_version: 1
-        
-    - name: Install modules
-      run: yarn
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
