@@ -16,11 +16,6 @@ jobs:
     name: PHP ${{ matrix.php-versions }}
     steps:
     - uses: actions/checkout@v2
-      with: 
-        composer_version: 1
-
-    - name: Validate composer.json and composer.lock
-      run: composer validate
 
     - name: Cache Composer packages
       id: composer-cache
@@ -32,6 +27,9 @@ jobs:
           ${{ runner.os }}-php-
 
     - name: Install dependencies
+      uses: php-actions/composer@v4
+      with: 
+        composer_version: 1
       if: steps.composer-cache.outputs.cache-hit != 'true'
       run: composer install --prefer-dist --no-progress --no-suggest
 
