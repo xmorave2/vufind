@@ -35,4 +35,5 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run ci
+      uses: stefanoeb/eslint-action@1.0.2
       run: vendor/bin/phing eslint jshint phpunitfast phpcs-console php-cs-fixer-dryrun checkLessToSass
