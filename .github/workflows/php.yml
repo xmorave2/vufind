@@ -20,10 +20,10 @@ jobs:
     - uses: actions/setup-node@v2-beta
 
     - name: Install eslint
-      run: npm install -g eslint@"<5.0.0"
+      run: npm install eslint@"<5.0.0"
       
     - name: Install jshint
-      run: npm install -g jshint@"2.9.6"
+      run: npm install jshint@"2.9.6"
       
     - name: Cache Composer packages
       id: composer-cache
