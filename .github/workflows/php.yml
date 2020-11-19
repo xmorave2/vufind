@@ -16,6 +16,8 @@ jobs:
     name: PHP ${{ matrix.php-versions }}
     steps:
     - uses: actions/checkout@v2
+      with: 
+        composer_version: 1
 
     - name: Validate composer.json and composer.lock
       run: composer validate
