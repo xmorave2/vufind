@@ -43,4 +43,4 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: Run ci
-      run: vendor/bin/phing eslint jshint phpunitfast phpcs-console php-cs-fixer-dryrun checkLessToSass
+      run: vendor/bin/phing phpunitfast phpcs-console php-cs-fixer-dryrun
