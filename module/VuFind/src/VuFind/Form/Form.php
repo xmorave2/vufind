@@ -723,6 +723,12 @@ class Form extends \Laminas\Form\Form implements
                 }
             }
 
+            if (empty($element['settings']['value'])
+                && !empty($params[$element['name']])
+            ) {
+                $element['settings']['value'] = $params[$element['name']];
+            }
+
             $elements[] = $element;
         }
 
