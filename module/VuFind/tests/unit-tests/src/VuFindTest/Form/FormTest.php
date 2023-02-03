@@ -424,18 +424,20 @@ class FormTest extends \PHPUnit\Framework\TestCase
      * Get a mock Form object.
      *
      * @param string $formId Form identifier
+     * @param array  $params Parameters to pass to setFormId
+     * @param array  $prefill Prefill data to pass to setFormId
      *
      * @return Form
      * @throws \Exception
      */
-    protected function getMockTestForm($formId)
+    protected function getMockTestForm($formId, $params = [], $prefill = [])
     {
         $form = new Form(
             $this->getMockTestFormYamlReader(),
             $this->createMock(\Laminas\View\HelperPluginManager::class),
             $this->createMock(\VuFind\Form\Handler\PluginManager::class)
         );
-        $form->setFormId($formId);
+        $form->setFormId($formId, $params, $prefill);
         return $form;
     }
 
@@ -841,6 +843,260 @@ class FormTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(
             $expectedSubject,
             $form->getEmailSubject($form->getData())
+        );
+    }
+
+    public function testPrefill(): void
+    {
+        $form = $this->getMockTestForm(
+            'TestPrefill',
+            [],
+            [
+                'message' => 'Here is your message', // Should be prefilled
+                'secret_code' => 'new_secret', // Should be prefilled
+                'phone' => '123456789', //Should not be prefilled
+            ]
+        );
+        $this->assertEquals(
+            [
+                [
+                    'type' => 'text',
+                    'name' => 'name',
+                    'group' => '__sender__',
+                    'label' => 'Sender Name',
+                    'settings' => ['size' => 50],
+                ],
+                [
+                    'type' => 'email',
+                    'name' => 'email',
+                    'group' => '__sender__',
+                    'label' => 'feedback_email',
+                    'settings' => ['size' => 254],
+                ],
+                [
+                    'type' => 'textarea',
+                    'name' => 'message',
+                    'label' => 'Comments',
+                    'settings' => [
+                        'cols' => 50,
+                        'rows' => 8,
+                        'value' => 'Here is your message',
+                    ],
+                ],
+                [
+                    'type' => 'text',
+                    'name' => 'phone',
+                    'label' => 'Phone Number',
+                    'settings' => ['size' => 50],
+                ],
+                [
+                    'type' => 'hidden',
+                    'name' => 'secret_code',
+                    'label' => '',
+                    'settings' => [
+                        'value' => 'new_secret',
+                    ],
+                ],
+                [
+                    'type' => 'submit',
+                    'name' => 'submit',
+                    'label' => 'Send',
+                ],
+            ],
+            $form->getFormElementConfig()
+        );
+    }
+
+    public function testPrefillProtectedFields(): void
+    {
+        $form = $this->getMockTestForm(
+            'TestPrefillProtectedFields',
+            ['userAgent' => 'VuFind Browser 1.0'],
+            [
+                'userAgent' => 'My Browser 1.0',
+                'submit'    => 'Bad submit value',
+            ]
+        );
+        $this->assertEquals(
+            [
+                [
+                    'type' => 'text',
+                    'name' => 'name',
+                    'group' => '__sender__',
+                    'label' => 'Sender Name',
+                    'settings' => ['size' => 50],
+                ],
+                [
+                    'type' => 'email',
+                    'name' => 'email',
+                    'group' => '__sender__',
+                    'label' => 'feedback_email',
+                    'settings' => ['size' => 254],
+                ],
+                [
+                    'type' => 'textarea',
+                    'name' => 'message',
+                    'label' => 'Comments',
+                    'settings' => [
+                        'cols' => 50,
+                        'rows' => 8,
+                    ],
+                ],
+                [
+                    'type' => 'hidden',
+                    'name' => 'useragent',
+                    'label' => 'User Agent',
+                    'settings' => ['value' => 'VuFind Browser 1.0'],
+                ],
+                [
+                    'type' => 'submit',
+                    'name' => 'submit',
+                    'label' => 'Send',
+                ],
+            ],
+            $form->getFormElementConfig()
+        );
+    }
+
+    public function testPrefillFieldWithOptions(): void
+    {
+        $form = $this->getMockTestForm(
+            'TestPrefillFieldWithOptions',
+            [],
+            [
+                'select1' => 'option1',
+                'checkbox1' => 'option2',
+                'radio1' => 'option3',
+            ]
+        );
+        $this->assertEquals(
+            [
+                [
+                    'type' => 'text',
+                    'name' => 'name',
+                    'group' => '__sender__',
+                    'label' => 'Sender Name',
+                    'settings' => ['size' => 50],
+                ],
+                [
+                    'type' => 'email',
+                    'name' => 'email',
+                    'group' => '__sender__',
+                    'label' => 'feedback_email',
+                    'settings' => ['size' => 254],
+                ],
+                [
+                    'type' => 'select',
+                    'name' => 'select1',
+                    'label' => 'Select1',
+                    'settings' => ['value' => 'option1'],
+                    'options' => [
+                        'o1' => ['value' => 'option1', 'label' => 'option1'],
+                        'o2' => ['value' => 'option2', 'label' => 'option2'],
+                        'o3' => ['value' => 'option3', 'label' => 'option3'],
+                    ],
+                ],
+                [
+                    'type' => 'checkbox',
+                    'name' => 'checkbox1',
+                    'label' => 'Checkbox1',
+                    'group' => 'checkbox1',
+                    'settings' => ['value' => 'option2'],
+                    'options' => [
+                        'o1' => ['value' => 'option1', 'label' => 'option1'],
+                        'o2' => ['value' => 'option2', 'label' => 'option2'],
+                        'o3' => ['value' => 'option3', 'label' => 'option3'],
+                    ],
+                ],
+                [
+                    'type' => 'radio',
+                    'name' => 'radio1',
+                    'label' => 'Radio1',
+                    'group' => 'radio1',
+                    'settings' => ['value' => 'option3'],
+                    'options' => [
+                        'o1' => ['value' => 'option1', 'label' => 'option1'],
+                        'o2' => ['value' => 'option2', 'label' => 'option2'],
+                        'o3' => ['value' => 'option3', 'label' => 'option3'],
+                    ],
+                ],
+                [
+                    'type' => 'submit',
+                    'name' => 'submit',
+                    'label' => 'Send',
+                ],
+            ],
+            $form->getFormElementConfig()
+        );
+
+        // Not available options should be ignores
+        $form = $this->getMockTestForm(
+            'TestPrefillFieldWithOptions',
+            [],
+            [
+                'select1' => 'option5',
+                'checkbox1' => 'option6',
+                'radio1' => 'option7',
+            ]
+        );
+        $this->assertEquals(
+            [
+                [
+                    'type' => 'text',
+                    'name' => 'name',
+                    'group' => '__sender__',
+                    'label' => 'Sender Name',
+                    'settings' => ['size' => 50],
+                ],
+                [
+                    'type' => 'email',
+                    'name' => 'email',
+                    'group' => '__sender__',
+                    'label' => 'feedback_email',
+                    'settings' => ['size' => 254],
+                ],
+                [
+                    'type' => 'select',
+                    'name' => 'select1',
+                    'label' => 'Select1',
+                    'settings' => [],
+                    'options' => [
+                        'o1' => ['value' => 'option1', 'label' => 'option1'],
+                        'o2' => ['value' => 'option2', 'label' => 'option2'],
+                        'o3' => ['value' => 'option3', 'label' => 'option3'],
+                    ],
+                ],
+                [
+                    'type' => 'checkbox',
+                    'name' => 'checkbox1',
+                    'label' => 'Checkbox1',
+                    'group' => 'checkbox1',
+                    'settings' => [],
+                    'options' => [
+                        'o1' => ['value' => 'option1', 'label' => 'option1'],
+                        'o2' => ['value' => 'option2', 'label' => 'option2'],
+                        'o3' => ['value' => 'option3', 'label' => 'option3'],
+                    ],
+                ],
+                [
+                    'type' => 'radio',
+                    'name' => 'radio1',
+                    'label' => 'Radio1',
+                    'group' => 'radio1',
+                    'settings' => [],
+                    'options' => [
+                        'o1' => ['value' => 'option1', 'label' => 'option1'],
+                        'o2' => ['value' => 'option2', 'label' => 'option2'],
+                        'o3' => ['value' => 'option3', 'label' => 'option3'],
+                    ],
+                ],
+                [
+                    'type' => 'submit',
+                    'name' => 'submit',
+                    'label' => 'Send',
+                ],
+            ],
+            $form->getFormElementConfig()
         );
     }
 }
